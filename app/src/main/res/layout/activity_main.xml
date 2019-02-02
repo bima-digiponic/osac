@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@color/White">
 
     <LinearLayout
         android:id="@+id/layout_btnBar"
@@ -51,7 +52,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toRightOf="@id/layout_btnBar"
-        app:layout_constraintRight_toLeftOf="@id/layout_invoice"
+        app:layout_constraintRight_toLeftOf="@id/divider_invoice"
         android:padding="15dp"
         android:orientation="vertical">
 
@@ -65,9 +66,21 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/divider_invoice"
+        android:layout_width="3dp"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@color/Grey"
+        app:layout_constraintLeft_toRightOf="@id/layout_menu"
+        app:layout_constraintRight_toLeftOf="@id/layout_invoice">
+
+
+    </LinearLayout>
+
     <android.support.constraint.ConstraintLayout
         android:id="@+id/layout_invoice"
-        android:layout_width="250dp"
+        android:layout_width="300dp"
         android:layout_height="match_parent"
         app:layout_constraintRight_toRightOf="parent">
 
@@ -123,6 +136,9 @@
             android:id="@+id/btn_checkout"
             android:layout_width="match_parent"
             android:layout_height="100dp"
+            android:background="@color/colorPrimary"
+            android:textSize="24sp"
+            android:textColor="@color/White"
             app:layout_constraintBottom_toBottomOf="parent"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:text="Checkout"

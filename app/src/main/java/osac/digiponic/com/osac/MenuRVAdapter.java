@@ -7,9 +7,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
+
+import osac.digiponic.com.osac.Model.DataItemMenu;
 
 public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder> {
 
@@ -31,10 +34,18 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
+
         DataItemMenu data = mDataItem.get(i);
         viewHolder._itemName.setText(data.get_itemName());
         viewHolder._itemPrice.setText(data.get_itemPrice());
+
+        if (isSelected(i)) {
+            viewHolder._deleteLayout.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder._deleteLayout.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
@@ -50,6 +61,14 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         return String.valueOf(mDataItem.get(id).get_itemPrice());
     }
 
+    void setSelected(int id, boolean input) {
+        mDataItem.get(id).setSelected(input);
+    }
+
+    boolean isSelected(int id) {
+        return mDataItem.get(id).isSelected();
+    }
+
     void setClickListener(ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
@@ -61,10 +80,12 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public CardView mCardView;
         public TextView _itemName, _itemPrice;
+        public LinearLayout _deleteLayout;
         public ViewHolder(View v) {
             super(v);
             v.setOnClickListener(this);
 
+            _deleteLayout = v.findViewById(R.id.layout_invoice_delete);
             mCardView = v.findViewById(R.id.cardView_itemMenu);
             _itemName = v.findViewById(R.id.text_itemName);
             _itemPrice = v.findViewById(R.id.text_itemPrice);
@@ -73,6 +94,9 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         @Override
         public void onClick(View v) {
             if (mClickListener != null) mClickListener.onItemClick(v, getAdapterPosition());
+
+
+
         }
     }
 

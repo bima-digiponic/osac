@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import osac.digiponic.com.osac.Model.DataItemMenu;
+
 public class InvoiceRVAdapter extends RecyclerView.Adapter<InvoiceRVAdapter.ViewHolder> {
 
     private List<DataItemMenu> mDataItem;
@@ -25,7 +27,7 @@ public class InvoiceRVAdapter extends RecyclerView.Adapter<InvoiceRVAdapter.View
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.menu_item, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.invoice_item, viewGroup, false);
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }
@@ -44,6 +46,12 @@ public class InvoiceRVAdapter extends RecyclerView.Adapter<InvoiceRVAdapter.View
 
     String getItem(int id) {
         return String.valueOf(mDataItem.get(id).get_itemName());
+    }
+
+    public void removeAt(int position) {
+        mDataItem.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, mDataItem.size());
     }
 
     void setClickListener(MenuRVAdapter.ItemClickListener itemClickListener) {

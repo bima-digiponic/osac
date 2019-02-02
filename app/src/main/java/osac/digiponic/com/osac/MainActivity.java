@@ -7,10 +7,13 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import osac.digiponic.com.osac.Model.DataItemMenu;
 
 public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener{
 
@@ -19,13 +22,29 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private RecyclerView recyclerView_Menu, recyclerView_Invoice;
     private MenuRVAdapter menuRVAdapter;
     private InvoiceRVAdapter invoiceRVAdapter;
+    private ImageView emptyCart;
 
     @Override
     public void onItemClick(View view, int position) {
         Toast.makeText(this, "Item " + menuRVAdapter.getItemName(position), Toast.LENGTH_SHORT).show();
 
-        // Add to Invoice
-        mDataCart.add(new DataItemMenu(menuRVAdapter.getItemName(position), menuRVAdapter.getItemPrice(position)));
+
+        if (!menuRVAdapter.isSelected(position)) {
+            mDataCart.add(new DataItemMenu(menuRVAdapter.getItemName(position), menuRVAdapter.getItemPrice(position)));
+            invoiceRVAdapter.notifyItemInserted(position);
+            menuRVAdapter.setSelected(position, true);
+            menuRVAdapter.notifyDataSetChanged();
+        } else {
+            for (int i = 0; i < mDataCart.size(); i++) {
+                if (mDataCart.get(i).get_itemName().equalsIgnoreCase(menuRVAdapter.getItemName(position))) {
+                    invoiceRVAdapter.removeAt(i);
+                    invoiceRVAdapter.notifyItemRemoved(i);
+                    menuRVAdapter.setSelected(position, false);
+                    menuRVAdapter.notifyDataSetChanged();
+                    break;
+                }
+            }
+        }
     }
 
     @Override
@@ -35,6 +54,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
         // Lock Screen to Horizontal
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Initialize Invoice Recyclerview Placeholder
+        emptyCart = findViewById(R.id.img_emptyCart);
 
         mDataItem.add(new DataItemMenu("Car Wash", "Rp 1000"));
         mDataItem.add(new DataItemMenu("Hand Wash", "Rp 2000"));
@@ -52,13 +74,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         mDataItem.add(new DataItemMenu("Spray Wash", "Rp 3000"));
         mDataItem.add(new DataItemMenu("Spray Wash", "Rp 3000"));
 
-
-        mDataCart.add(new DataItemMenu("Spray Wash", "Rp 3000"));
-        mDataCart.add(new DataItemMenu("Hand Wash", "Rp 2000"));
-
         // Setup Menu Recyclerview
         recyclerView_Menu = findViewById(R.id.rv_menu);
-        int numberOfColumns = 5;
+        int numberOfColumns = 4;
         recyclerView_Menu.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
         menuRVAdapter = new MenuRVAdapter(this, mDataItem);
         menuRVAdapter.setClickListener(this);
@@ -71,9 +89,36 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         invoiceRVAdapter.setClickListener(this);
         invoiceRVAdapter.notifyDataSetChanged();
         recyclerView_Invoice.setAdapter(invoiceRVAdapter);
+        invoiceRVAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                checkEmpty();
+            }
+
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                super.onItemRangeInserted(positionStart, itemCount);
+                checkEmpty();
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                super.onItemRangeRemoved(positionStart, itemCount);
+                checkEmpty();
+            }
+
+        });
 
 
 
+
+
+
+    }
+
+    private void checkEmpty() {
+        emptyCart.setVisibility(invoiceRVAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
 
     }
 }

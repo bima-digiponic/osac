@@ -1,9 +1,18 @@
-package osac.digiponic.com.osac;
+package osac.digiponic.com.osac.Model;
 
 public class DataItemMenu {
 
     private String _itemName;
     private String _itemPrice;
+    private boolean selected = false;
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
 
     public DataItemMenu() {
     }
