@@ -53,11 +53,44 @@
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toRightOf="@id/layout_btnBar"
         app:layout_constraintRight_toLeftOf="@id/divider_invoice"
-        android:padding="15dp"
         android:orientation="vertical">
+
+        <LinearLayout
+            android:background="@color/colorPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="OSAC"
+                android:textColor="@color/White"
+                android:layout_weight="1"
+                android:textSize="36sp"
+                android:layout_margin="15dp"
+                />
+
+            <Spinner
+                android:id="@+id/spinner_filterType"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="15dp"
+                android:backgroundTint="@color/White"
+
+                >
+
+
+            </Spinner>
+
+        </LinearLayout>
+
+
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_menu"
+            android:padding="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center_horizontal"
-    tools:context=".Admin"
+    tools:context=".Print.Admin"
     android:orientation="vertical">
 
     <LinearLayout
@@ -27,6 +27,12 @@
             android:layout_height="150dp"
             android:textSize="24sp"
             style="@style/Widget.AppCompat.EditText"
+            />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Print"
             />
 
 
