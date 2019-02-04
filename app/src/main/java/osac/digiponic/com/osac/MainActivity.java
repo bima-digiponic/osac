@@ -296,7 +296,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             } finally {
                 conn.disconnect();
             }
-
             return null;
         }
     }
@@ -310,8 +309,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
-
         }
 
         @Override
