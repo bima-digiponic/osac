@@ -38,7 +38,7 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
 
         DataItemMenu data = mDataItem.get(i);
         viewHolder._itemName.setText(data.get_itemName());
-        viewHolder._itemPrice.setText(data.get_itemPrice());
+        viewHolder._itemPrice.setText(String.valueOf(data.get_itemPrice()));
 
         if (isSelected(i)) {
             viewHolder._deleteLayout.setVisibility(View.VISIBLE);

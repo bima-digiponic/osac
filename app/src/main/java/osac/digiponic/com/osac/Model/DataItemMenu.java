@@ -41,8 +41,8 @@ public class DataItemMenu {
         this._itemName = _itemName;
     }
 
-    public String get_itemPrice() {
-        return _itemPrice;
+    public int get_itemPrice() {
+        return Integer.parseInt(_itemPrice);
     }
 
     public void set_itemPrice(String _itemPrice) {
