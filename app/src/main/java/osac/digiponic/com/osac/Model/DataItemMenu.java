@@ -1,11 +1,24 @@
 package osac.digiponic.com.osac.Model;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class DataItemMenu {
 
+    @SerializedName("_itemID")
+    @Expose
     private String _itemID;
+    @SerializedName("_itemName")
+    @Expose
     private String _itemName;
+    @SerializedName("_itemPrice")
+    @Expose
     private String _itemPrice;
+    @SerializedName("_itemVehicleType")
+    @Expose
     private String _itemVehicleType;
+    @SerializedName("_itemType")
+    @Expose
     private String _itemType;
     private boolean selected = false;
 

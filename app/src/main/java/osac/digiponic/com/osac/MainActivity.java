@@ -19,6 +19,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonObject;
+import com.google.gson.annotations.SerializedName;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,6 +40,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import osac.digiponic.com.osac.Model.DataItemMenu;
+import osac.digiponic.com.osac.webservice.APIServiceCheckout;
+import osac.digiponic.com.osac.webservice.ServiceGenerator;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener {
 
@@ -50,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private int pageState = 0;
     private Spinner typeFilter;
     private String carType = "";
+    private JsonObject jsonObject;
 
     public static final int CONNECTION_TIMEOUT = 10000;
     public static final int READ_TIMEOUT = 15000;
@@ -94,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             public void onClick(View v) {
                 createJSON();
                 dataCartClear();
+                sendData();
 //                new Async_PostData();
             }
         });
@@ -191,32 +203,54 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             }
         }
         try {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("police_number", null);
-            jsonObject.put("generals_id", null);
-            jsonObject.put("total_price", total_price);
-            jsonObject.put("discount", discount);
-            jsonObject.put("grand_total_price", total_price);
+            jsonObject = new JsonObject();
+
+            // Add Property
+            jsonObject.addProperty("police_number", "");
+            jsonObject.addProperty("generals_id", "");
+            jsonObject.addProperty("total_price", total_price);
+            jsonObject.addProperty("discount", discount);
+            jsonObject.addProperty("grand_total_price", total_price);
 
             //JsonArr
-            JSONArray jsonArray = new JSONArray();
+            JsonArray jsonArray = new JsonArray();
             for (DataItemMenu item : mDataCart) {
-                JSONObject pnObj = new JSONObject();
-                pnObj.put("types_id", 0);
-                pnObj.put("types_name", item.get_itemType());
-                pnObj.put("services_id", item.get_itemID());
-                pnObj.put("services_name", item.get_itemName());
-                pnObj.put("service_price", item.get_itemPrice());
-                jsonArray.put(pnObj);
+                JsonObject pnObj = new JsonObject();
+                pnObj.addProperty("types_id", 0);
+                pnObj.addProperty("types_name", item.get_itemType());
+                pnObj.addProperty("services_id", item.get_itemID());
+                pnObj.addProperty("services_name", item.get_itemName());
+                pnObj.addProperty("service_price", item.get_itemPrice());
+                jsonArray.add(pnObj);
             }
-            jsonObject.put("service_detail", jsonArray);
+            jsonObject.add("service_detail", jsonArray);
             Log.d("EXPORTJSON", jsonObject.toString());
-        } catch (JSONException e) {
+        } catch (JsonIOException e) {
             Log.d("JSONERROREX", e.toString());
         }
 
     }
 
+    private void sendData() {
+        APIServiceCheckout jsonPostService = ServiceGenerator.createService(APIServiceCheckout.class, "http://app.digiponic.co.id/osac/apiosac/api/transaction/");
+        Call<JsonObject> call = jsonPostService.postRawJSON(jsonObject);
+        Log.d("jsonSendData", jsonObject.toString());
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                try {
+                    Log.d("respones-success", response.body().toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Log.d("respones-failure", call.toString());
+            }
+        });
+    }
 
 
     private void setAdapterRV() {
@@ -489,5 +523,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         invoiceRVAdapter.notifyDataSetChanged();
         menuRVAdapter.notifyDataSetChanged();
     }
+
 
 }
