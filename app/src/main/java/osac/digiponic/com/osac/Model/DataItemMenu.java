@@ -20,6 +20,9 @@ public class DataItemMenu {
     @SerializedName("_itemType")
     @Expose
     private String _itemType;
+    @SerializedName("_itemImage")
+    @Expose
+    private String _itemImage;
     private boolean selected = false;
 
     public boolean isSelected() {
@@ -44,6 +47,15 @@ public class DataItemMenu {
         this._itemPrice = _itemPrice;
         this._itemVehicleType = _itemVehicleType;
         this._itemType = _itemType;
+    }
+
+    public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemType, boolean selected) {
+        this._itemID = _itemID;
+        this._itemName = _itemName;
+        this._itemPrice = _itemPrice;
+        this._itemVehicleType = _itemVehicleType;
+        this._itemType = _itemType;
+        this.selected = selected;
     }
 
     public String get_itemName() {

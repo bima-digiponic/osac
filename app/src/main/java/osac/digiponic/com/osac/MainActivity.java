@@ -1,7 +1,9 @@
 package osac.digiponic.com.osac;
 
+import android.app.Dialog;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,19 +21,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonIOException;
-import com.google.gson.JsonObject;
-import com.google.gson.annotations.SerializedName;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -40,11 +42,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import osac.digiponic.com.osac.Model.DataItemMenu;
-import osac.digiponic.com.osac.webservice.APIServiceCheckout;
-import osac.digiponic.com.osac.webservice.ServiceGenerator;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener {
 
@@ -60,7 +57,11 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private int pageState = 0;
     private Spinner typeFilter;
     private String carType = "";
-    private JsonObject jsonObject;
+
+    private Dialog completeDialog;
+
+    private List<DataItemMenu> dataCarWash = new ArrayList<>();
+    private List<DataItemMenu> dataCarCare = new ArrayList<>();
 
     public static final int CONNECTION_TIMEOUT = 10000;
     public static final int READ_TIMEOUT = 15000;
@@ -95,18 +96,22 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Lock Screen to Horizontal
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
+        // Setup Dialog
+        completeDialog = new Dialog(this);
+        setupCompleteDialog();
+
         // Initialize Invoice Recyclerview Placeholder
         emptyCart = findViewById(R.id.img_emptyCart);
+
 
         // Set Checkout Button
         checkOutBtn = findViewById(R.id.btn_checkout);
         checkOutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createJSON();
+                new HTTPAsyncTask().execute("http://app.digiponic.co.id/osac/apiosac/public/transaction");
                 dataCartClear();
-                sendData();
-//                new Async_PostData();
+                completeDialog.show();
             }
         });
 
@@ -178,7 +183,11 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         typeFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+                if (position == 1) {
+                    filter("Car Wash");
+                } else if (position == 2) {
+                    filter("Car Care");
+                }
             }
 
             @Override
@@ -190,66 +199,27 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Get Data From API
         new Async_GetData().execute(carType);
         Log.d("mDataItem", mDataItem.toString());
-
-
     }
 
-    private void createJSON() {
-        int total_price = 0;
-        int discount = 0;
-        if (mDataCart.size() > 0) {
-            for (DataItemMenu item : mDataCart) {
-                total_price += item.get_itemPrice();
+    private void filter(String type) {
+        for (DataItemMenu item : mDataItem) {
+            if (item.get_itemType().equals("Car Wash")) {
+                dataCarWash.add(new DataItemMenu(item.get_itemID(), item.get_itemName(), String.valueOf(item.get_itemPrice()), item.get_itemVehicleType(), item.get_itemType(), item.isSelected()));
+            } else {
+                dataCarCare.add(new DataItemMenu(item.get_itemID(), item.get_itemName(), String.valueOf(item.get_itemPrice()), item.get_itemVehicleType(), item.get_itemType(), item.isSelected()));
             }
         }
-        try {
-            jsonObject = new JsonObject();
-
-            // Add Property
-            jsonObject.addProperty("police_number", "");
-            jsonObject.addProperty("generals_id", "");
-            jsonObject.addProperty("total_price", total_price);
-            jsonObject.addProperty("discount", discount);
-            jsonObject.addProperty("grand_total_price", total_price);
-
-            //JsonArr
-            JsonArray jsonArray = new JsonArray();
-            for (DataItemMenu item : mDataCart) {
-                JsonObject pnObj = new JsonObject();
-                pnObj.addProperty("types_id", 0);
-                pnObj.addProperty("types_name", item.get_itemType());
-                pnObj.addProperty("services_id", item.get_itemID());
-                pnObj.addProperty("services_name", item.get_itemName());
-                pnObj.addProperty("service_price", item.get_itemPrice());
-                jsonArray.add(pnObj);
-            }
-            jsonObject.add("service_detail", jsonArray);
-            Log.d("EXPORTJSON", jsonObject.toString());
-        } catch (JsonIOException e) {
-            Log.d("JSONERROREX", e.toString());
+        mDataItem.clear();
+        if (type.equals("Car Wash")) {
+            mDataItem.addAll(dataCarWash);
+            dataCarWash.clear();
+        } else {
+            mDataItem.addAll(dataCarCare);
+            dataCarCare.clear();
         }
 
-    }
+        menuRVAdapter.notifyDataSetChanged();
 
-    private void sendData() {
-        APIServiceCheckout jsonPostService = ServiceGenerator.createService(APIServiceCheckout.class, "http://app.digiponic.co.id/osac/apiosac/api/transaction/");
-        Call<JsonObject> call = jsonPostService.postRawJSON(jsonObject);
-        Log.d("jsonSendData", jsonObject.toString());
-        call.enqueue(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                try {
-                    Log.d("respones-success", response.body().toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
-                Log.d("respones-failure", call.toString());
-            }
-        });
     }
 
 
@@ -301,7 +271,8 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         protected void onPreExecute() {
             super.onPreExecute();
             mDataItem.clear();
-
+            dataCarCare.clear();
+            dataCarWash.clear();
         }
 
         @Override
@@ -310,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             String carType = params[0];
 
             try {
-                url = new URL("http://app.digiponic.co.id/osac/apiosac/api/service?vehicle=" + carType);
+                url = new URL("http://app.digiponic.co.id/osac/apiosac/public/service?vehicle=" + carType);
                 Log.d("ConenctionTest", "connected url : " + url.toString());
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -392,92 +363,104 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     }
 
     // Post Data
-    private class Async_PostData extends AsyncTask<String, String, String> {
-
-        HttpURLConnection conn;
-        URL url = null;
+    public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-
+        protected String doInBackground(String... urls) {
+            // params comes from the execute() call: params[0] is the url.
             try {
-                url = new URL("http://app.digiponic.co.id/osac/apiosac/api/transaction");
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                return "exception";
-            }
-            try {
-                // Setup HttpURLConnection
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(READ_TIMEOUT);
-                conn.setConnectTimeout(CONNECTION_TIMEOUT);
-                conn.setRequestMethod("POST");
-                // setDoInput and setDoOutput method depict handling of both send and receive
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-
-                conn.connect();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                return e1.toString();
-            }
-
-            try {
-                int response_code = conn.getResponseCode();
-
-                // Check Response Code
-                if (response_code == HttpURLConnection.HTTP_OK) {
-                    //Read data sent from server
-                    InputStream input = conn.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    StringBuilder result = new StringBuilder();
-                    String line;
-
-
-                    while ((line = reader.readLine()) != null) {
-                        result.append(line);
-                    }
-
-                    String resultFromServer = "";
-
-                    JSONObject jsonObject = null;
-                    JSONArray jsonArray = null;
-                    try {
-                        jsonArray = new JSONArray(result.toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-
-                    int jLoop = 0;
-                    while (jLoop < jsonArray.length()) {
-                        jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
-                        mDataItem.add(new DataItemMenu(jsonObject.getString("id"),
-                                jsonObject.getString("name"), jsonObject.getString("price"),
-                                jsonObject.getString("vehicle"), jsonObject.getString("type")));
-                        jLoop += 1;
-                    }
-                    return (resultFromServer);
-
-                } else {
-                    return ("unsuccessful");
+                try {
+                    return HttpPost(urls[0]);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return "Error!";
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-                return "exception";
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } finally {
-                conn.disconnect();
+                return "Unable to retrieve web page. URL may be invalid.";
             }
-
-            return null;
         }
+
+        // onPostExecute displays the results of the AsyncTask.
+        @Override
+        protected void onPostExecute(String result) {
+        }
+
+        private String HttpPost(String myUrl) throws IOException, JSONException {
+            String result = "";
+
+            URL url = new URL(myUrl);
+
+            // 1. create HttpURLConnection
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+
+            // 2. build JSON object
+            JSONObject jsonObject = createJSON();
+
+            // 3. add JSON content to POST request body
+            setPostRequestContent(conn, jsonObject);
+
+            // 4. make POST request to the given URL
+            conn.connect();
+
+            // 5. return response message
+            return conn.getResponseMessage() + "";
+
+        }
+
+
+        private void setPostRequestContent(HttpURLConnection conn,
+                                           JSONObject jsonObject) throws IOException {
+
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+            writer.write(jsonObject.toString());
+            Log.i(MainActivity.class.toString(), jsonObject.toString());
+            writer.flush();
+            writer.close();
+            os.close();
+        }
+    }
+
+    private JSONObject createJSON() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        int total_price = 0;
+        int discount = 0;
+        if (mDataCart.size() > 0) {
+            for (DataItemMenu item : mDataCart) {
+                total_price += item.get_itemPrice();
+            }
+        }
+
+        try {
+            // Add Property
+            jsonObject.accumulate("police_number", null);
+            jsonObject.accumulate("generals_id", null);
+            jsonObject.accumulate("total", total_price);
+            jsonObject.accumulate("discount", discount);
+            jsonObject.accumulate("grand_total", total_price);
+
+            //JsonArr
+            JSONArray jsonArray = new JSONArray();
+            for (DataItemMenu item : mDataCart) {
+                JSONObject pnObj = new JSONObject();
+                pnObj.accumulate("types_id", 0);
+                pnObj.accumulate("types_name", "Car Wash");
+                pnObj.accumulate("services_id", 2);
+                pnObj.accumulate("services_name", item.get_itemName());
+                pnObj.accumulate("service_price", item.get_itemPrice());
+                jsonArray.put(pnObj);
+            }
+            jsonObject.accumulate("service_detail", jsonArray);
+            Log.d("EXPORTJSON", jsonObject.toString());
+        } catch (JsonIOException e) {
+            Log.d("JSONERROREX", e.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
     }
 
 
@@ -524,5 +507,20 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         menuRVAdapter.notifyDataSetChanged();
     }
 
+    private void setupCompleteDialog() {
+
+        completeDialog.setContentView(R.layout.dialog_done);
+        completeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        completeDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        Button okBtn = completeDialog.findViewById(R.id.dialog_ok_btn);
+        okBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                completeDialog.dismiss();
+            }
+        });
+
+    }
 
 }

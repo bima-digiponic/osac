@@ -4,9 +4,11 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -35,17 +37,37 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
-
         DataItemMenu data = mDataItem.get(i);
         viewHolder._itemName.setText(data.get_itemName());
         viewHolder._itemPrice.setText(String.valueOf(data.get_itemPrice()));
-
         if (isSelected(i)) {
             viewHolder._deleteLayout.setVisibility(View.VISIBLE);
         } else {
             viewHolder._deleteLayout.setVisibility(View.GONE);
         }
-
+        switch (Integer.parseInt(data.get_itemID())) {
+            case 7:
+                viewHolder._itemImage.setImageResource(R.drawable.ganti_ban);
+                break;
+            case 8:
+                viewHolder._itemImage.setImageResource(R.drawable.cuci_salju);
+                break;
+            case 3:
+                viewHolder._itemImage.setImageResource(R.drawable.cuci_mobil_kering);
+                break;
+            case 4:
+                viewHolder._itemImage.setImageResource(R.drawable.cuci_body);
+                break;
+            case 6:
+                viewHolder._itemImage.setImageResource(R.drawable.ganti_oli);
+                break;
+            case 2:
+                viewHolder._itemImage.setImageResource(R.drawable.cuci_mobil_kering);
+                break;
+            case 5:
+                viewHolder._itemImage.setImageResource(R.drawable.poles_body);
+                break;
+        }
     }
 
     @Override
@@ -81,14 +103,15 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         public CardView mCardView;
         public TextView _itemName, _itemPrice;
         public LinearLayout _deleteLayout;
+        public ImageView _itemImage;
         public ViewHolder(View v) {
             super(v);
             v.setOnClickListener(this);
-
             _deleteLayout = v.findViewById(R.id.layout_invoice_delete);
             mCardView = v.findViewById(R.id.cardView_itemMenu);
             _itemName = v.findViewById(R.id.text_itemName);
             _itemPrice = v.findViewById(R.id.text_itemPrice);
+            _itemImage = v.findViewById(R.id.img_itemImg);
         }
 
         @Override
