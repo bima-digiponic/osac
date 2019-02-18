@@ -1,4 +1,4 @@
-package osac.digiponic.com.osac;
+package osac.digiponic.com.osac.Adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Locale;
 
 import osac.digiponic.com.osac.Model.DataItemMenu;
+import osac.digiponic.com.osac.R;
 
 public class InvoiceRVAdapter extends RecyclerView.Adapter<InvoiceRVAdapter.ViewHolder> {
 
@@ -48,7 +49,7 @@ public class InvoiceRVAdapter extends RecyclerView.Adapter<InvoiceRVAdapter.View
         return mDataItem.size();
     }
 
-    String getItem(int id) {
+    public String getItem(int id) {
         return String.valueOf(mDataItem.get(id).get_itemName());
     }
 
@@ -58,7 +59,7 @@ public class InvoiceRVAdapter extends RecyclerView.Adapter<InvoiceRVAdapter.View
         notifyItemRangeChanged(position, mDataItem.size());
     }
 
-    void setClickListener(MenuRVAdapter.ItemClickListener itemClickListener) {
+    public void setClickListener(MenuRVAdapter.ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
 

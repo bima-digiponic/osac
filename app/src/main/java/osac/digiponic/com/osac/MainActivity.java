@@ -39,39 +39,49 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
+import osac.digiponic.com.osac.Adapter.InvoiceRVAdapter;
+import osac.digiponic.com.osac.Adapter.MenuRVAdapter;
 import osac.digiponic.com.osac.Model.DataItemMenu;
 
 public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener {
 
+    // Dataset
     private List<DataItemMenu> mDataItem = new ArrayList<>();
     private List<DataItemMenu> mDataCart = new ArrayList<>();
-    private List<DataItemMenu> mDataItemFiltered = new ArrayList<>();
-
-    private RecyclerView recyclerView_Menu, recyclerView_Invoice;
-    private Button smallCar, mediumCar, bigCar, checkOutBtn;
-    private MenuRVAdapter menuRVAdapter;
-    private InvoiceRVAdapter invoiceRVAdapter;
-    private ImageView emptyCart;
-    private int pageState = 0;
-    private Spinner typeFilter;
-    private String carType = "";
-    private TextView total_tv;
-
-    private Dialog completeDialog;
-    public boolean dataFetched = false;
-
     private List<DataItemMenu> dataCarWash = new ArrayList<>();
     private List<DataItemMenu> dataCarCare = new ArrayList<>();
 
+    // Content
+    private RecyclerView recyclerView_Menu, recyclerView_Invoice;
+    private ImageView emptyCart;
+    private Spinner typeFilter;
+    private TextView total_tv, date_tv;
+    private Dialog completeDialog, incompleteDialog, changeTypeDialog;
+    private Button smallCar, mediumCar, bigCar, checkOutBtn;
     private SmoothProgressBar progressBar;
     private LinearLayout blackLayout;
 
+    // Adapter
+    private MenuRVAdapter menuRVAdapter;
+    private InvoiceRVAdapter invoiceRVAdapter;
+
+    // Variable
+    public boolean dataFetched = false;
+    private int pageState = 0;
+    private String carType = "";
+    private boolean resultChange;
+    private String clickedType = "";
+
+    // Constraint
     public static final int CONNECTION_TIMEOUT = 10000;
     public static final int READ_TIMEOUT = 15000;
 
@@ -83,13 +93,24 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Lock Screen to Horizontal
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
-        // Initalize Textview Total
+        // Initialize TextView Total
         total_tv = findViewById(R.id.total_textview_main);
         total_tv.setText("Rp. 0");
+
+        // Initialize TextView Date
+        date_tv = findViewById(R.id.date);
+        Date date = Calendar.getInstance().getTime();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String formattedDate = dateFormat.format(date);
+        date_tv.setText(formattedDate);
 
         // Setup Dialog
         completeDialog = new Dialog(this);
         setupCompleteDialog();
+        incompleteDialog = new Dialog(this);
+        setupUnCompleteDialog();
+        changeTypeDialog = new Dialog(this);
+        setupChangeTypeDialog();
 
         // Initialize Invoice Recyclerview Placeholder
         emptyCart = findViewById(R.id.img_emptyCart);
@@ -103,10 +124,14 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         checkOutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new HTTPAsyncTask().execute("http://app.digiponic.co.id/osac/apiosac/public/transaction");
+                new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/public/transaction");
                 dataCartClear();
                 total_tv.setText("Rp. 0");
-                completeDialog.show();
+                if (mDataCart.size() == 0) {
+                    incompleteDialog.show();
+                } else {
+                    completeDialog.show();
+                }
             }
         });
 
@@ -122,25 +147,22 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         smallCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pageState = 0;
-                checkState();
-                new Async_GetData().execute(carType);
+                clickedType = "Small";
+                changeTypeDialog.show();
             }
         });
         mediumCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pageState = 1;
-                checkState();
-                new Async_GetData().execute(carType);
+                clickedType = "Medium";
+                changeTypeDialog.show();
             }
         });
         bigCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pageState = 2;
-                checkState();
-                new Async_GetData().execute(carType);
+                clickedType = "Big";
+                changeTypeDialog.show();
             }
         });
 
@@ -239,7 +261,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
     }
 
-
     private void setAdapterRV() {
         // Setup Menu Recyclerview
         recyclerView_Menu = findViewById(R.id.rv_menu);
@@ -280,24 +301,26 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     // Get Data
     private class Async_GetData extends AsyncTask<String, String, String> {
 
+        // Variable
         HttpURLConnection conn;
         URL url = null;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            // Clear data before execute
             mDataItem.clear();
             dataCarCare.clear();
             dataCarWash.clear();
             mDataCart.clear();
             blackLayout.setVisibility(View.VISIBLE);
+            resultChange = false;
         }
 
         @Override
         protected String doInBackground(String... params) {
-
+            // Background process, Fetching data from API
             String carType = params[0];
-
             try {
                 url = new URL("http://app.digiponic.co.id/osac/apiosac/public/service?vehicle=" + carType);
                 Log.d("ConenctionTest", "connected url : " + url.toString());
@@ -319,7 +342,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                 Log.d("ConenctionTest", "not connected");
                 return e1.toString();
             }
-
             try {
                 int response_code = conn.getResponseCode();
 
@@ -331,14 +353,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                     StringBuilder result = new StringBuilder();
                     String line;
-
-
                     while ((line = reader.readLine()) != null) {
                         result.append(line);
                     }
-
                     String resultFromServer = "";
-
                     JSONObject jsonObject = null;
                     JSONArray jsonArray = null;
                     try {
@@ -346,8 +364,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
-
                     int jLoop = 0;
                     while (jLoop < jsonArray.length()) {
                         jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
@@ -356,9 +372,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                                 jsonObject.getString("vehicle"), jsonObject.getString("type")));
                         jLoop += 1;
                     }
-
                     return (resultFromServer);
-
                 } else {
                     return ("unsuccessful");
                 }
@@ -383,12 +397,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     }
 
     // Post Data
-    public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
-
+    public class HTTPAsyncTaskPOSTData extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
         }
 
         @Override
@@ -413,7 +425,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
         private String HttpPost(String myUrl) throws IOException, JSONException {
             String result = "";
-
             URL url = new URL(myUrl);
 
             // 1. create HttpURLConnection
@@ -432,13 +443,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
             // 5. return response message
             return conn.getResponseMessage() + "";
-
         }
-
 
         private void setPostRequestContent(HttpURLConnection conn,
                                            JSONObject jsonObject) throws IOException {
-
             OutputStream os = conn.getOutputStream();
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
             writer.write(jsonObject.toString());
@@ -489,10 +497,12 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         return jsonObject;
     }
 
+    /*
+        Method bellow for supporting purpose
+     */
 
     private void checkEmpty() {
         emptyCart.setVisibility(invoiceRVAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
-
     }
 
     private void checkState() {
@@ -521,7 +531,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         mediumCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         bigCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         button.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight));
-
     }
 
     private void dataCartClear() {
@@ -535,7 +544,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     }
 
     private void setupCompleteDialog() {
-
         completeDialog.setContentView(R.layout.dialog_done);
         completeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         completeDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -547,7 +555,68 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                 completeDialog.dismiss();
             }
         });
-
     }
 
+    private void setupUnCompleteDialog() {
+        incompleteDialog.setContentView(R.layout.dialog_undone);
+        incompleteDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        incompleteDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        Button okBtn = incompleteDialog.findViewById(R.id.dialog_ok_btn_undone);
+        okBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                incompleteDialog.dismiss();
+            }
+        });
+    }
+
+    private void setupChangeTypeDialog() {
+        changeTypeDialog.setContentView(R.layout.change_type_dialog);
+        changeTypeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        changeTypeDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        Button cancelBtn = changeTypeDialog.findViewById(R.id.dialog_cancel_btn_change);
+        Button okBtn = changeTypeDialog.findViewById(R.id.dialog_ok_btn_change);
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resultChange = false;
+                changeTypeDialog.dismiss();
+            }
+        });
+        okBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resultChange = true;
+                changeTypeDialog.dismiss();
+                changeType(clickedType);
+            }
+        });
+    }
+
+    private void changeType(String type) {
+        switch (type) {
+            case "Small":
+                pageState = 0;
+                checkState();
+                new Async_GetData().execute(carType);
+                typeFilter.setSelection(0);
+                break;
+            case "Medium":
+                pageState = 1;
+                checkState();
+                new Async_GetData().execute(carType);
+                typeFilter.setSelection(0);
+                break;
+            case "Big":
+                pageState = 2;
+                checkState();
+                new Async_GetData().execute(carType);
+                typeFilter.setSelection(0);
+                break;
+            default:
+
+        }
+    }
 }

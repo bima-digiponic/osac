@@ -94,7 +94,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
                 android:layout_weight="1"
-                android:text="OSAC"
+                android:text="ONE STOP AUTO CARE"
                 android:textColor="@color/White"
                 android:textSize="36sp" />
 
@@ -107,7 +107,6 @@
                 android:backgroundTint="@color/White"></Spinner>
 
         </LinearLayout>
-
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_menu"
@@ -145,7 +144,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="15dp"
-            android:text="STRUK"
+            android:text="OSAC"
             android:textAlignment="center"
             android:textSize="32sp" />
 
@@ -166,10 +165,43 @@
             app:layout_constraintBottom_toTopOf="@id/btn_checkout"
             app:layout_constraintTop_toBottomOf="@id/divider">
 
+            <LinearLayout
+                android:id="@+id/date_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_weight="2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:text="Tanggal "
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@id/btn_checkout"/>
+
+                <TextView
+                    android:layout_weight="1"
+                    android:id="@+id/date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textAlignment="textEnd"
+                    app:layout_constraintBottom_toTopOf="@id/btn_checkout"
+                    android:gravity="end" />
+
+            </LinearLayout>
+
             <android.support.v7.widget.RecyclerView
+                android:layout_below="@id/date_layout"
                 android:id="@+id/rv_invoiceItem"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"></android.support.v7.widget.RecyclerView>
+                android:layout_height="wrap_content">
+
+            </android.support.v7.widget.RecyclerView>
 
             <ImageView
                 android:id="@+id/img_emptyCart"

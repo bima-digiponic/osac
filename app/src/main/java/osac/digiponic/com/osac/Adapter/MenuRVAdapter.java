@@ -1,10 +1,9 @@
-package osac.digiponic.com.osac;
+package osac.digiponic.com.osac.Adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +11,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
 import osac.digiponic.com.osac.Model.DataItemMenu;
+import osac.digiponic.com.osac.R;
 
 public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder> {
 
@@ -91,23 +90,23 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         return mDataItem.size();
     }
 
-    String getItemName(int id) {
+    public String getItemName(int id) {
         return String.valueOf(mDataItem.get(id).get_itemName());
     }
 
-    String getItemPrice(int id) {
+    public String getItemPrice(int id) {
         return String.valueOf(mDataItem.get(id).get_itemPrice());
     }
 
-    void setSelected(int id, boolean input) {
+    public void setSelected(int id, boolean input) {
         mDataItem.get(id).setSelected(input);
     }
 
-    boolean isSelected(int id) {
+    public boolean isSelected(int id) {
         return mDataItem.get(id).isSelected();
     }
 
-    void setClickListener(ItemClickListener itemClickListener) {
+    public void setClickListener(ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
 
