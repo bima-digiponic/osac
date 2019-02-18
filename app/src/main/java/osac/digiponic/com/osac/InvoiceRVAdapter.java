@@ -9,7 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 import osac.digiponic.com.osac.Model.DataItemMenu;
 
@@ -36,7 +38,9 @@ public class InvoiceRVAdapter extends RecyclerView.Adapter<InvoiceRVAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         DataItemMenu data = mDataItem.get(i);
         viewHolder._itemName.setText(data.get_itemName());
-        viewHolder._itemPrice.setText(String.valueOf(data.get_itemPrice()));
+        Locale localeID = new Locale("in", "ID");
+        NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
+        viewHolder._itemPrice.setText(formatRupiah.format((double)data.get_itemPrice()));
     }
 
     @Override

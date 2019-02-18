@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,10 +38,13 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
+import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import osac.digiponic.com.osac.Model.DataItemMenu;
 
 public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener {
@@ -57,36 +61,19 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private int pageState = 0;
     private Spinner typeFilter;
     private String carType = "";
+    private TextView total_tv;
 
     private Dialog completeDialog;
+    public boolean dataFetched = false;
 
     private List<DataItemMenu> dataCarWash = new ArrayList<>();
     private List<DataItemMenu> dataCarCare = new ArrayList<>();
 
+    private SmoothProgressBar progressBar;
+    private LinearLayout blackLayout;
+
     public static final int CONNECTION_TIMEOUT = 10000;
     public static final int READ_TIMEOUT = 15000;
-
-    @Override
-    public void onItemClick(View view, int position) {
-        Toast.makeText(this, "Item " + menuRVAdapter.getItemName(position), Toast.LENGTH_SHORT).show();
-
-        if (!menuRVAdapter.isSelected(position)) {
-            mDataCart.add(new DataItemMenu(menuRVAdapter.getItemName(position), menuRVAdapter.getItemPrice(position)));
-            invoiceRVAdapter.notifyItemInserted(position);
-            menuRVAdapter.setSelected(position, true);
-            menuRVAdapter.notifyDataSetChanged();
-        } else {
-            for (int i = 0; i < mDataCart.size(); i++) {
-                if (mDataCart.get(i).get_itemName().equalsIgnoreCase(menuRVAdapter.getItemName(position))) {
-                    invoiceRVAdapter.removeAt(i);
-                    invoiceRVAdapter.notifyItemRemoved(i);
-                    menuRVAdapter.setSelected(position, false);
-                    menuRVAdapter.notifyDataSetChanged();
-                    break;
-                }
-            }
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +83,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Lock Screen to Horizontal
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
+        // Initalize Textview Total
+        total_tv = findViewById(R.id.total_textview_main);
+        total_tv.setText("Rp. 0");
+
         // Setup Dialog
         completeDialog = new Dialog(this);
         setupCompleteDialog();
@@ -103,6 +94,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Initialize Invoice Recyclerview Placeholder
         emptyCart = findViewById(R.id.img_emptyCart);
 
+        // Setup Progress Bar
+        progressBar = findViewById(R.id.progress_bar);
+        blackLayout = findViewById(R.id.loading_layout);
 
         // Set Checkout Button
         checkOutBtn = findViewById(R.id.btn_checkout);
@@ -111,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             public void onClick(View v) {
                 new HTTPAsyncTask().execute("http://app.digiponic.co.id/osac/apiosac/public/transaction");
                 dataCartClear();
+                total_tv.setText("Rp. 0");
                 completeDialog.show();
             }
         });
@@ -152,29 +147,16 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Setup Spinner
         typeFilter = findViewById(R.id.spinner_filterType);
         String[] serviceType = new String[]{
-                "Select Service...", "Car Wash", "Car Care"
+                "Semua Jasa", "Car Wash", "Car Care"
         };
         final List<String> serviceList = new ArrayList<>(Arrays.asList(serviceType));
         final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
                 this, R.layout.spinner_item, serviceList) {
             @Override
-            public boolean isEnabled(int position) {
-                if (position == 0) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-
-            @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
                 TextView textView = (TextView) view;
-                if (position == 0) {
-                    textView.setTextColor(Color.LTGRAY);
-                } else {
-                    textView.setTextColor(Color.BLACK);
-                }
+                textView.setTextColor(Color.BLACK);
                 return view;
             }
         };
@@ -187,18 +169,51 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                     filter("Car Wash");
                 } else if (position == 2) {
                     filter("Car Care");
+                } else if (position == 0) {
+                    filter("All");
+                }
+                if (dataFetched) {
+                    menuRVAdapter.notifyDataSetChanged();
                 }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
         // Get Data From API
         new Async_GetData().execute(carType);
         Log.d("mDataItem", mDataItem.toString());
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        Locale localeID = new Locale("in", "ID");
+        NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
+        int total = 0;
+        if (!menuRVAdapter.isSelected(position)) {
+            mDataCart.add(new DataItemMenu(menuRVAdapter.getItemName(position), menuRVAdapter.getItemPrice(position)));
+            invoiceRVAdapter.notifyItemInserted(position);
+            menuRVAdapter.setSelected(position, true);
+            menuRVAdapter.notifyDataSetChanged();
+        } else {
+            for (int i = 0; i < mDataCart.size(); i++) {
+                if (mDataCart.get(i).get_itemName().equalsIgnoreCase(menuRVAdapter.getItemName(position))) {
+                    invoiceRVAdapter.removeAt(i);
+                    invoiceRVAdapter.notifyItemRemoved(i);
+                    menuRVAdapter.setSelected(position, false);
+                    menuRVAdapter.notifyDataSetChanged();
+                    break;
+                }
+            }
+        }
+        for (DataItemMenu item : mDataCart) {
+            total += item.get_itemPrice();
+        }
+        if (total > 0) {
+            total_tv.setText(formatRupiah.format((double) total));
+        }
     }
 
     private void filter(String type) {
@@ -213,13 +228,15 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         if (type.equals("Car Wash")) {
             mDataItem.addAll(dataCarWash);
             dataCarWash.clear();
-        } else {
+        } else if (type.equals("Car Care")) {
             mDataItem.addAll(dataCarCare);
             dataCarCare.clear();
+        } else {
+            mDataItem.addAll(dataCarCare);
+            mDataItem.addAll(dataCarWash);
+            dataCarCare.clear();
+            dataCarWash.clear();
         }
-
-        menuRVAdapter.notifyDataSetChanged();
-
     }
 
 
@@ -260,7 +277,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         });
     }
 
-
     // Get Data
     private class Async_GetData extends AsyncTask<String, String, String> {
 
@@ -273,6 +289,8 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             mDataItem.clear();
             dataCarCare.clear();
             dataCarWash.clear();
+            mDataCart.clear();
+            blackLayout.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -359,11 +377,19 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             setAdapterRV();
+            blackLayout.setVisibility(View.GONE);
+            dataFetched = true;
         }
     }
 
     // Post Data
     public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
 
         @Override
         protected String doInBackground(String... urls) {
@@ -494,7 +520,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         smallCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         mediumCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         bigCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        button.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+        button.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight));
 
     }
 
@@ -505,6 +531,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
         invoiceRVAdapter.notifyDataSetChanged();
         menuRVAdapter.notifyDataSetChanged();
+        total_tv.setText("");
     }
 
     private void setupCompleteDialog() {

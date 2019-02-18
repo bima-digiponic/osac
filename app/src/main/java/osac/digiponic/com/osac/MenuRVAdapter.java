@@ -12,7 +12,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 import osac.digiponic.com.osac.Model.DataItemMenu;
 
@@ -39,33 +42,46 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
         DataItemMenu data = mDataItem.get(i);
         viewHolder._itemName.setText(data.get_itemName());
-        viewHolder._itemPrice.setText(String.valueOf(data.get_itemPrice()));
+        Locale localeID = new Locale("in", "ID");
+        NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
+        viewHolder._itemPrice.setText(formatRupiah.format((double)data.get_itemPrice()));
         if (isSelected(i)) {
             viewHolder._deleteLayout.setVisibility(View.VISIBLE);
         } else {
             viewHolder._deleteLayout.setVisibility(View.GONE);
         }
-        switch (Integer.parseInt(data.get_itemID())) {
-            case 7:
-                viewHolder._itemImage.setImageResource(R.drawable.ganti_ban);
+//        switch (Integer.parseInt(data.get_itemID())) {
+//            case 7:
+//                viewHolder._itemImage.setImageResource(R.drawable.ganti_ban);
+//                break;
+//            case 8:
+//                viewHolder._itemImage.setImageResource(R.drawable.cuci_salju);
+//                break;
+//            case 3:
+//                viewHolder._itemImage.setImageResource(R.drawable.cuci_mobil_kering);
+//                break;
+//            case 4:
+//                viewHolder._itemImage.setImageResource(R.drawable.cuci_body);
+//                break;
+//            case 6:
+//                viewHolder._itemImage.setImageResource(R.drawable.ganti_oli);
+//                break;
+//            case 2:
+//                viewHolder._itemImage.setImageResource(R.drawable.cuci_mobil_kering);
+//                break;
+//            case 5:
+//                viewHolder._itemImage.setImageResource(R.drawable.poles_body);
+//                break;
+//        }
+        switch (data.get_itemVehicleType()) {
+            case "Small":
+                viewHolder._itemImage.setImageResource(R.drawable.small);
                 break;
-            case 8:
-                viewHolder._itemImage.setImageResource(R.drawable.cuci_salju);
+            case "Medium":
+                viewHolder._itemImage.setImageResource(R.drawable.medium);
                 break;
-            case 3:
-                viewHolder._itemImage.setImageResource(R.drawable.cuci_mobil_kering);
-                break;
-            case 4:
-                viewHolder._itemImage.setImageResource(R.drawable.cuci_body);
-                break;
-            case 6:
-                viewHolder._itemImage.setImageResource(R.drawable.ganti_oli);
-                break;
-            case 2:
-                viewHolder._itemImage.setImageResource(R.drawable.cuci_mobil_kering);
-                break;
-            case 5:
-                viewHolder._itemImage.setImageResource(R.drawable.poles_body);
+            case "Big":
+                viewHolder._itemImage.setImageResource(R.drawable.big);
                 break;
         }
     }
