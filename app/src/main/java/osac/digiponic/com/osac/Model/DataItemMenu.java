@@ -41,12 +41,13 @@ public class DataItemMenu {
         this._itemPrice = _itemPrice;
     }
 
-    public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemType) {
+    public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemType, String _itemImage) {
         this._itemID = _itemID;
         this._itemName = _itemName;
         this._itemPrice = _itemPrice;
         this._itemVehicleType = _itemVehicleType;
         this._itemType = _itemType;
+        this._itemImage = _itemImage;
     }
 
     public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemType, boolean selected) {
@@ -96,5 +97,13 @@ public class DataItemMenu {
 
     public void set_itemType(String _itemType) {
         this._itemType = _itemType;
+    }
+
+    public String get_itemImage() {
+        return _itemImage;
+    }
+
+    public void set_itemImage(String _itemImage) {
+        this._itemImage = _itemImage;
     }
 }

@@ -70,7 +70,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
-            android:text="Mobil\nBesa"
+            android:text="Mobil\nBesar"
             android:textColor="@color/White" />
 
     </LinearLayout>

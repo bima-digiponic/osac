@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -15,7 +16,7 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SplashScreen"
+            android:name=".Print.AdminActivity"
             android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,7 +27,9 @@
         <activity android:name=".MainActivity"
             android:theme="@style/NoActionBar"/>
         <activity android:name=".NavigationMenu" />
-        <activity android:name=".Print.Admin"
+        <activity android:name=".SplashScreen"
+            android:theme="@style/NoActionBar"></activity>
+        <activity android:name=".Print.DeviceList"
             android:theme="@style/NoActionBar"></activity>
     </application>
 

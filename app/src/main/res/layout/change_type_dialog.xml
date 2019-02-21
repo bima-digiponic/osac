@@ -55,7 +55,7 @@
                     android:layout_weight="1"
                     android:background="@color/colorPrimaryDark"
                     android:padding="20dp"
-                    android:text="Cancel"
+                    android:text="Batal"
                     android:textColor="@color/White"
                     android:textSize="50sp" />
 

@@ -39,4 +39,7 @@ dependencies {
 
     // Progress Bar
     implementation 'com.github.castorflex.smoothprogressbar:library:1.1.0'
+
+    // Picasso
+    implementation 'com.squareup.picasso:picasso:2.71828'
 }

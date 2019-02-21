@@ -69,9 +69,11 @@ public class DeviceList extends ListActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                     REQUEST_COARSE_LOCATION);
+
         }else {
             proceedDiscovery();
         }
+
     }
 
 

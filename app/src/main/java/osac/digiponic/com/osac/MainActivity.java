@@ -1,10 +1,12 @@
 package osac.digiponic.com.osac;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -124,14 +126,22 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         checkOutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/public/transaction");
-                dataCartClear();
-                total_tv.setText("Rp. 0");
-                if (mDataCart.size() == 0) {
-                    incompleteDialog.show();
-                } else {
-                    completeDialog.show();
-                }
+                blackLayout.setVisibility(View.VISIBLE);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        blackLayout.setVisibility(View.GONE);
+                        if (mDataCart.size() == 0) {
+                            incompleteDialog.show();
+                        } else {
+                            completeDialog.show();
+                        }
+                        new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/public/transaction");
+                        dataCartClear();
+                        total_tv.setText("Rp. 0");
+                        Log.d("datacartsize", String.valueOf(mDataCart.size()));
+                    }
+                }, 3000);
             }
         });
 
@@ -230,6 +240,8 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                 }
             }
         }
+        Log.d("datacartsizeadd", String.valueOf(mDataCart.size()));
+
         for (DataItemMenu item : mDataCart) {
             total += item.get_itemPrice();
         }
@@ -314,6 +326,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             dataCarWash.clear();
             mDataCart.clear();
             blackLayout.setVisibility(View.VISIBLE);
+            total_tv.setText("Rp. 0");
             resultChange = false;
         }
 
@@ -322,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             // Background process, Fetching data from API
             String carType = params[0];
             try {
-                url = new URL("http://app.digiponic.co.id/osac/apiosac/public/service?vehicle=" + carType);
+                url = new URL("http://app.digiponic.co.id/osac/api/public/service?vehicle=" + carType);
                 Log.d("ConenctionTest", "connected url : " + url.toString());
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -369,7 +382,8 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                         jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
                         mDataItem.add(new DataItemMenu(jsonObject.getString("id"),
                                 jsonObject.getString("name"), jsonObject.getString("price"),
-                                jsonObject.getString("vehicle"), jsonObject.getString("type")));
+                                jsonObject.getString("vehicle"), jsonObject.getString("type"),
+                                jsonObject.getString("images")));
                         jLoop += 1;
                     }
                     return (resultFromServer);
@@ -401,6 +415,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+
         }
 
         @Override
@@ -508,18 +523,18 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private void checkState() {
         switch (pageState) {
             case 0:
-                carType = "Small";
+                carType = "Kecil";
                 pageState = 0;
                 changeBtnBackgroound(smallCar);
 
                 break;
             case 1:
-                carType = "Medium";
+                carType = "Sedang";
                 pageState = 1;
                 changeBtnBackgroound(mediumCar);
                 break;
             case 2:
-                carType = "Big";
+                carType = "Besar";
                 pageState = 2;
                 changeBtnBackgroound(bigCar);
                 break;

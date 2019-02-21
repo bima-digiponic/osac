@@ -4,12 +4,15 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -49,6 +52,8 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         } else {
             viewHolder._deleteLayout.setVisibility(View.GONE);
         }
+//        Log.d("urlimageimage", data.get_itemImage());
+        Picasso.get().load(data.get_itemImage()).into(viewHolder._itemImage);
 //        switch (Integer.parseInt(data.get_itemID())) {
 //            case 7:
 //                viewHolder._itemImage.setImageResource(R.drawable.ganti_ban);
@@ -72,6 +77,7 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
 //                viewHolder._itemImage.setImageResource(R.drawable.poles_body);
 //                break;
 //        }
+
         switch (data.get_itemVehicleType()) {
             case "Small":
                 viewHolder._itemImage.setImageResource(R.drawable.small);
