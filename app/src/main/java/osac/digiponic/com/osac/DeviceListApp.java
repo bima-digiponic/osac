@@ -1,13 +1,6 @@
-package osac.digiponic.com.osac.Print;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+package osac.digiponic.com.osac;
 
 import android.Manifest;
-import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -17,8 +10,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -27,24 +22,27 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import osac.digiponic.com.osac.Adapter.DeviceAdapter;
 import osac.digiponic.com.osac.Model.DataDevice;
-import osac.digiponic.com.osac.R;
 
-public class DeviceList extends ListActivity {
+public class DeviceListApp extends AppCompatActivity implements DeviceAdapter.ItemClickListener {
     private static String TAG = "---DeviceList";
 
     // Request Code
     public static final int REQUEST_COARSE_LOCATION = 200;
-    static public final int REQUEST_CONNECT_BT = 0*2300;
-    static private final int REQUEST_ENABLE_BT = 0*1000;
+    static public final int REQUEST_CONNECT_BT = 0 * 2300;
+    static private final int REQUEST_ENABLE_BT = 0 * 1000;
 
     // Adapter
     static private BluetoothAdapter mBluetoothAdapter = null;
-    static private ArrayAdapter<String> mArrayAdapter = null;
     private DeviceAdapter deviceAdapter;
 
     // RecyclerView
@@ -62,9 +60,12 @@ public class DeviceList extends ListActivity {
     static private BluetoothSocket mbtSocket = null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_device_list);
+        setContentView(R.layout.activity_device_list);
+
+        RVDeviceList = findViewById(R.id.rv_device_list);
+
 
         setTitle("Bluetooth Devices");
 
@@ -76,7 +77,6 @@ public class DeviceList extends ListActivity {
         } catch (Exception ex) {
             finish();
         }
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
@@ -84,12 +84,10 @@ public class DeviceList extends ListActivity {
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                     REQUEST_COARSE_LOCATION);
 
-        }else {
+        } else {
             proceedDiscovery();
         }
-
     }
-
 
     protected void proceedDiscovery() {
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -99,9 +97,23 @@ public class DeviceList extends ListActivity {
         mBluetoothAdapter.startDiscovery();
     }
 
+
+
     public static BluetoothSocket getSocket() {
         return mbtSocket;
     }
+
+    private Runnable socketErrorRunnable = new Runnable() {
+
+        @Override
+        public void run() {
+            Toast.makeText(getApplicationContext(),
+                    "Cannot establish connection", Toast.LENGTH_SHORT).show();
+            mBluetoothAdapter.startDiscovery();
+
+        }
+    };
+
 
     private void flushData() {
         try {
@@ -119,13 +131,6 @@ public class DeviceList extends ListActivity {
                 btDevices = null;
             }
 
-            if (mArrayAdapter != null) {
-                mArrayAdapter.clear();
-                mArrayAdapter.notifyDataSetChanged();
-                mArrayAdapter.notifyDataSetInvalidated();
-                mArrayAdapter = null;
-            }
-
             if (mDataDevice != null) {
                 mDataDevice.clear();
             }
@@ -141,6 +146,7 @@ public class DeviceList extends ListActivity {
         }
 
     }
+
     private int initDevicesList() {
         flushData();
 
@@ -155,10 +161,14 @@ public class DeviceList extends ListActivity {
             mBluetoothAdapter.cancelDiscovery();
         }
 
-        mArrayAdapter = new ArrayAdapter<String>(getApplicationContext(),
-                R.layout.layout_list);
+        // Adapter
+        deviceAdapter = new DeviceAdapter(this, mDataDevice);
+        deviceAdapter.setClickListener(this);
 
-        setListAdapter(mArrayAdapter);
+        // RecyclerView
+        int numberOfColmns = 3;
+        RVDeviceList.setLayoutManager(new GridLayoutManager(this, numberOfColmns));
+        RVDeviceList.setAdapter(deviceAdapter);
 
         Intent enableBtIntent = new Intent(
                 BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -178,10 +188,9 @@ public class DeviceList extends ListActivity {
     }
 
     @Override
-    protected void onActivityResult(int reqCode, int resultCode, Intent intent) {
-        super.onActivityResult(reqCode, resultCode, intent);
-
-        switch (reqCode) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
             case REQUEST_ENABLE_BT:
 
                 if (resultCode == RESULT_OK) {
@@ -195,9 +204,10 @@ public class DeviceList extends ListActivity {
 
                                     btDevices.add(device);
 
-                                    mArrayAdapter.add(device.getName() + "\n"
-                                            + device.getAddress());
-                                    mArrayAdapter.notifyDataSetInvalidated();
+                                    mDataDevice.add(new DataDevice(device.getName(), device.getAddress()));
+                                    deviceAdapter.notifyDataSetChanged();
+                                    Log.d("jumlahdevice", String.valueOf(mDataDevice.size()));
+                                    Toast.makeText(this, "INI JALAN", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         }
@@ -209,7 +219,6 @@ public class DeviceList extends ListActivity {
                 break;
         }
         mBluetoothAdapter.startDiscovery();
-
     }
 
     private final BroadcastReceiver mBTReceiver = new BroadcastReceiver() {
@@ -223,14 +232,13 @@ public class DeviceList extends ListActivity {
                 try {
                     if (btDevices == null) {
                         btDevices = new ArrayAdapter<BluetoothDevice>(
-                                getApplicationContext(), R.layout.layout_list);
+                                getApplicationContext(), R.layout.item_device);
                     }
 
                     if (btDevices.getPosition(device) < 0) {
                         btDevices.add(device);
-                        mArrayAdapter.add(device.getName() + "\n"
-                                + device.getAddress() + "\n" );
-                        mArrayAdapter.notifyDataSetInvalidated();
+                        mDataDevice.add(new DataDevice(device.getName(), device.getAddress()));
+                        deviceAdapter.notifyDataSetChanged();
                     }
                 } catch (Exception ex) {
                     ex.fillInStackTrace();
@@ -240,10 +248,7 @@ public class DeviceList extends ListActivity {
     };
 
     @Override
-    protected void onListItemClick(ListView l, View v, final int position,
-                                   long id) {
-        super.onListItemClick(l, v, position, id);
-
+    public void onItemClick(View view, final int position) {
         if (mBluetoothAdapter == null) {
             return;
         }
@@ -295,17 +300,6 @@ public class DeviceList extends ListActivity {
         connectThread.start();
     }
 
-    private Runnable socketErrorRunnable = new Runnable() {
-
-        @Override
-        public void run() {
-            Toast.makeText(getApplicationContext(),
-                    "Cannot establish connection", Toast.LENGTH_SHORT).show();
-            mBluetoothAdapter.startDiscovery();
-
-        }
-    };
-
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -356,5 +350,4 @@ public class DeviceList extends ListActivity {
             e.printStackTrace();
         }
     }
-
 }

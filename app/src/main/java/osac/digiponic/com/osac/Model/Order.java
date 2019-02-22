@@ -2,39 +2,41 @@ package osac.digiponic.com.osac.Model;
 
 public class Order {
 
-    public static final String TABLE_NAME = "transaction";
+    public static final String TABLE_NAME = "transaction_table";
 
     public static final String COLUMN_ID = "id";
-    public static final String COLUMN_TYPES_ID = "types_id";
-    public static final String COLUMN_TYPES_NAME = "types_name";
-    public static final String COLUMN_SERVICES_ID = "services_id";
-    public static final String COLUMN_SERVICES_NAME = "services_name";
-    public static final String COLUMN_SERVICES_PRICE = "services_price";
+    public static final String COLUMN_NAME = "name";
+    public static final String COLUMN_PRICE = "price";
+    public static final String COLUMN_VEHICLE_TYPE = "vehicle_type";
+    public static final String COLUMN_SERVICE_TYPE = "services_type";
+    public static final String COLUMN_IMAGE = "image";
 
     private int id;
-    private String types_id;
-    private String types_name;
-    private String services_id;
-    private String services_name;
-    private String services_price;
+    private String name;
+    private String price;
+    private String vehicle_type;
+    private String service_type;
+    private String image;
 
     public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME +
-            "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            COLUMN_TYPES_ID + " TEXT, " +
-            COLUMN_TYPES_NAME + " TEXT, " +
-            COLUMN_SERVICES_ID + " TEXT, " +
-            COLUMN_SERVICES_NAME + " TEXT, " +
-            COLUMN_SERVICES_PRICE + " TEXT, " + ")";
+            " (" + COLUMN_ID + " INTEGER PRIMARY KEY, " +
+            COLUMN_NAME + " TEXT, " +
+            COLUMN_PRICE + " TEXT, " +
+            COLUMN_VEHICLE_TYPE + " TEXT, " +
+            COLUMN_SERVICE_TYPE + " TEXT, " +
+            COLUMN_IMAGE + " TEXT)";
 
     public Order() {
     }
 
-    public Order(String types_id, String types_name, String services_id, String services_name, String services_price) {
-        this.types_id = types_id;
-        this.types_name = types_name;
-        this.services_id = services_id;
-        this.services_name = services_name;
-        this.services_price = services_price;
+
+    public Order(int id, String name, String price, String vehicle_type, String service_type, String image) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.vehicle_type = vehicle_type;
+        this.service_type = service_type;
+        this.image = image;
     }
 
     public int getId() {
@@ -45,43 +47,43 @@ public class Order {
         this.id = id;
     }
 
-    public String getTypes_id() {
-        return types_id;
+    public String getName() {
+        return name;
     }
 
-    public void setTypes_id(String types_id) {
-        this.types_id = types_id;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getTypes_name() {
-        return types_name;
+    public String getPrice() {
+        return price;
     }
 
-    public void setTypes_name(String types_name) {
-        this.types_name = types_name;
+    public void setPrice(String price) {
+        this.price = price;
     }
 
-    public String getServices_id() {
-        return services_id;
+    public String getVehicle_type() {
+        return vehicle_type;
     }
 
-    public void setServices_id(String services_id) {
-        this.services_id = services_id;
+    public void setVehicle_type(String vehicle_type) {
+        this.vehicle_type = vehicle_type;
     }
 
-    public String getServices_name() {
-        return services_name;
+    public String getService_type() {
+        return service_type;
     }
 
-    public void setServices_name(String services_name) {
-        this.services_name = services_name;
+    public void setService_type(String service_type) {
+        this.service_type = service_type;
     }
 
-    public String getServices_price() {
-        return services_price;
+    public String getImage() {
+        return image;
     }
 
-    public void setServices_price(String services_price) {
-        this.services_price = services_price;
+    public void setImage(String image) {
+        this.image = image;
     }
 }

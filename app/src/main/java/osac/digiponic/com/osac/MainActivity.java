@@ -52,13 +52,14 @@ import java.util.Locale;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import osac.digiponic.com.osac.Adapter.InvoiceRVAdapter;
 import osac.digiponic.com.osac.Adapter.MenuRVAdapter;
+import osac.digiponic.com.osac.Helper.DatabaseHelperOrder;
 import osac.digiponic.com.osac.Model.DataItemMenu;
 
 public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener {
 
     // Dataset
     private List<DataItemMenu> mDataItem = new ArrayList<>();
-    private List<DataItemMenu> mDataCart = new ArrayList<>();
+    private List<DataItemMenu> mDataCart;
     private List<DataItemMenu> dataCarWash = new ArrayList<>();
     private List<DataItemMenu> dataCarCare = new ArrayList<>();
 
@@ -71,6 +72,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private Button smallCar, mediumCar, bigCar, checkOutBtn;
     private SmoothProgressBar progressBar;
     private LinearLayout blackLayout;
+
+    // Database
+    private DatabaseHelperOrder db;
 
     // Adapter
     private MenuRVAdapter menuRVAdapter;
@@ -105,6 +109,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         String formattedDate = dateFormat.format(date);
         date_tv.setText(formattedDate);
+
+        // Database
+        db = new DatabaseHelperOrder(this);
+//        db.deleteAllData();
 
         // Setup Dialog
         completeDialog = new Dialog(this);
@@ -224,30 +232,38 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         Locale localeID = new Locale("in", "ID");
         NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
         int total = 0;
+        Toast.makeText(this, String.valueOf(position), Toast.LENGTH_SHORT).show();
         if (!menuRVAdapter.isSelected(position)) {
-            mDataCart.add(new DataItemMenu(menuRVAdapter.getItemName(position), menuRVAdapter.getItemPrice(position)));
+//            mDataCart.add(new DataItemMenu(menuRVAdapter.getItemName(position), menuRVAdapter.getItemPrice(position)));
+            db.insertData(new DataItemMenu(menuRVAdapter.getItemID(position), menuRVAdapter.getItemName(position),
+                                            menuRVAdapter.getItemPrice(position), menuRVAdapter.getItemVehicleType(position),
+                                            menuRVAdapter.getItemType(position), menuRVAdapter.getItemImage(position)));
             invoiceRVAdapter.notifyItemInserted(position);
+            invoiceRVAdapter.notifyDataSetChanged();
             menuRVAdapter.setSelected(position, true);
             menuRVAdapter.notifyDataSetChanged();
-        } else {
-            for (int i = 0; i < mDataCart.size(); i++) {
-                if (mDataCart.get(i).get_itemName().equalsIgnoreCase(menuRVAdapter.getItemName(position))) {
-                    invoiceRVAdapter.removeAt(i);
-                    invoiceRVAdapter.notifyItemRemoved(i);
-                    menuRVAdapter.setSelected(position, false);
-                    menuRVAdapter.notifyDataSetChanged();
-                    break;
-                }
-            }
-        }
-        Log.d("datacartsizeadd", String.valueOf(mDataCart.size()));
 
-        for (DataItemMenu item : mDataCart) {
-            total += item.get_itemPrice();
+        } else {
+            menuRVAdapter.setSelected(position, false);
+            menuRVAdapter.notifyDataSetChanged();
+//            for (int i = 0; i < mDataCart.size(); i++) {
+//                if (mDataCart.get(i).get_itemName().equalsIgnoreCase(menuRVAdapter.getItemName(position))) {
+//                    invoiceRVAdapter.removeAt(i);
+//                    invoiceRVAdapter.notifyItemRemoved(i);
+//                    menuRVAdapter.setSelected(position, false);
+//                    menuRVAdapter.notifyDataSetChanged();
+//                    break;
+//                }
+//            }
         }
-        if (total > 0) {
-            total_tv.setText(formatRupiah.format((double) total));
-        }
+//        Log.d("datacartsizeadd", String.valueOf(mDataCart.size()));
+
+//        for (DataItemMenu item : mDataCart) {
+//            total += item.get_itemPrice();
+//        }
+//        if (total > 0) {
+//            total_tv.setText(formatRupiah.format((double) total));
+//        }
     }
 
     private void filter(String type) {
@@ -285,7 +301,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Setup Invoice Recyclerview
         recyclerView_Invoice = findViewById(R.id.rv_invoiceItem);
         recyclerView_Invoice.setLayoutManager(new LinearLayoutManager(this));
-        invoiceRVAdapter = new InvoiceRVAdapter(this, mDataCart);
+//        mDataCart = db.getAllData();
+        invoiceRVAdapter = new InvoiceRVAdapter(this, db.getAllData());
+//        invoiceRVAdapter = new InvoiceRVAdapter(this, mDataCart);
         invoiceRVAdapter.setClickListener(this);
         invoiceRVAdapter.notifyDataSetChanged();
         recyclerView_Invoice.setAdapter(invoiceRVAdapter);
@@ -324,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             mDataItem.clear();
             dataCarCare.clear();
             dataCarWash.clear();
-            mDataCart.clear();
+//            mDataCart.clear();
             blackLayout.setVisibility(View.VISIBLE);
             total_tv.setText("Rp. 0");
             resultChange = false;

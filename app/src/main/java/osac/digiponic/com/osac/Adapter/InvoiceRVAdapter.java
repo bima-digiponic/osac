@@ -13,6 +13,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
+import osac.digiponic.com.osac.Helper.DatabaseHelperOrder;
 import osac.digiponic.com.osac.Model.DataItemMenu;
 import osac.digiponic.com.osac.R;
 
@@ -21,6 +22,7 @@ public class InvoiceRVAdapter extends RecyclerView.Adapter<InvoiceRVAdapter.View
     private List<DataItemMenu> mDataItem;
     private Context mContext;
     MenuRVAdapter.ItemClickListener mClickListener;
+    private DatabaseHelperOrder db;
 
     public InvoiceRVAdapter(Context mContext, List<DataItemMenu> mDataItem) {
         this.mDataItem = mDataItem;

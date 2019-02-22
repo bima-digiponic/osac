@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 
+import osac.digiponic.com.osac.DeviceListApp;
 import osac.digiponic.com.osac.R;
 
 public class AdminActivity extends AppCompatActivity {
@@ -56,8 +57,8 @@ public class AdminActivity extends AppCompatActivity {
 
     protected void printBill() {
         if(btsocket == null){
-            Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
-            this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
+            Intent BTIntent = new Intent(getApplicationContext(), DeviceListApp.class);
+            this.startActivityForResult(BTIntent, DeviceListApp.REQUEST_CONNECT_BT);
         }
         else{
             OutputStream opstream = null;
@@ -118,7 +119,7 @@ public class AdminActivity extends AppCompatActivity {
             }
             outputStream = opstream;
 
-            //print command
+            // Print Invoice
             try {
                 try {
                     Thread.sleep(1000);
@@ -134,18 +135,52 @@ public class AdminActivity extends AppCompatActivity {
                 printUnicode();
                 //print normal text
                 printCustom(message.getText().toString(),0,0);
-                printPhoto(R.drawable.img);
+                printPhoto(R.drawable.logo);
+                printNewLine();
+                printNewLine();
+                printNewLine();
+                printPhoto(R.drawable.barcode);
                 printNewLine();
                 printText("     >>>>   Thank you  <<<<     "); // total 32 char in a single line
-                //resetPrint(); //reset printer
-                printUnicode();
-                printNewLine();
-                printNewLine();
+//                //resetPrint(); //reset printer
+//                printUnicode();
+//                printNewLine();
+//                printNewLine();
 
                 outputStream.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+
+//            //print command
+//            try {
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                outputStream = btsocket.getOutputStream();
+//
+//                byte[] printformat = { 0x1B, 0*21, FONT_TYPE };
+//                //outputStream.write(printformat);
+//
+//                //print title
+//                printUnicode();
+//                //print normal text
+//                printCustom(message.getText().toString(),0,0);
+//                printPhoto(R.drawable.img);
+//                printNewLine();
+//                printText("     >>>>   Thank you  <<<<     "); // total 32 char in a single line
+//                //resetPrint(); //reset printer
+//                printUnicode();
+//                printNewLine();
+//                printNewLine();
+//
+//                outputStream.flush();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
@@ -310,7 +345,8 @@ public class AdminActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         try {
-            btsocket = DeviceList.getSocket();
+//            btsocket = DeviceList.getSocket();
+            btsocket = DeviceListApp.getSocket();
             if(btsocket != null){
                 printText(message.getText().toString());
             }

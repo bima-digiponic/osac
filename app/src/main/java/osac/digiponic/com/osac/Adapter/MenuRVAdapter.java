@@ -18,6 +18,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
+import osac.digiponic.com.osac.Helper.DatabaseHelperOrder;
 import osac.digiponic.com.osac.Model.DataItemMenu;
 import osac.digiponic.com.osac.R;
 
@@ -26,6 +27,7 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
     private List<DataItemMenu> mDataItem;
     private Context mContext;
     ItemClickListener mClickListener;
+    private DatabaseHelperOrder db;
 
     public MenuRVAdapter(Context mContext, List<DataItemMenu> mDataItem) {
         this.mDataItem = mDataItem;
@@ -52,43 +54,8 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         } else {
             viewHolder._deleteLayout.setVisibility(View.GONE);
         }
-//        Log.d("urlimageimage", data.get_itemImage());
-        Picasso.get().load(data.get_itemImage()).into(viewHolder._itemImage);
-//        switch (Integer.parseInt(data.get_itemID())) {
-//            case 7:
-//                viewHolder._itemImage.setImageResource(R.drawable.ganti_ban);
-//                break;
-//            case 8:
-//                viewHolder._itemImage.setImageResource(R.drawable.cuci_salju);
-//                break;
-//            case 3:
-//                viewHolder._itemImage.setImageResource(R.drawable.cuci_mobil_kering);
-//                break;
-//            case 4:
-//                viewHolder._itemImage.setImageResource(R.drawable.cuci_body);
-//                break;
-//            case 6:
-//                viewHolder._itemImage.setImageResource(R.drawable.ganti_oli);
-//                break;
-//            case 2:
-//                viewHolder._itemImage.setImageResource(R.drawable.cuci_mobil_kering);
-//                break;
-//            case 5:
-//                viewHolder._itemImage.setImageResource(R.drawable.poles_body);
-//                break;
-//        }
 
-        switch (data.get_itemVehicleType()) {
-            case "Small":
-                viewHolder._itemImage.setImageResource(R.drawable.small);
-                break;
-            case "Medium":
-                viewHolder._itemImage.setImageResource(R.drawable.medium);
-                break;
-            case "Big":
-                viewHolder._itemImage.setImageResource(R.drawable.big);
-                break;
-        }
+        Picasso.get().load(data.get_itemImage()).into(viewHolder._itemImage);
     }
 
     @Override
@@ -98,6 +65,22 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
 
     public String getItemName(int id) {
         return String.valueOf(mDataItem.get(id).get_itemName());
+    }
+
+    public String getItemID(int id) {
+        return String.valueOf(mDataItem.get(id).get_itemID());
+    }
+
+    public String getItemVehicleType(int id) {
+        return String.valueOf(mDataItem.get(id).get_itemVehicleType());
+    }
+
+    public String getItemType(int id) {
+        return String.valueOf(mDataItem.get(id).get_itemType());
+    }
+
+    public String getItemImage(int id) {
+        return String.valueOf(mDataItem.get(id).get_itemImage());
     }
 
     public String getItemPrice(int id) {
