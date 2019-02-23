@@ -230,12 +230,14 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     @Override
     public void onItemClick(View view, int position) {
+        Log.d("itempositiondebug", String.valueOf(position));
+        Log.d("itempositionname",String.valueOf(menuRVAdapter.getItemName(position) +  menuRVAdapter.getItemPrice(position)));
         Locale localeID = new Locale("in", "ID");
         NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
         int total = 0;
         if (!menuRVAdapter.isSelected(position)) {
             mDataCart.add(new DataItemMenu(menuRVAdapter.getItemName(position), menuRVAdapter.getItemPrice(position)));
-            invoiceRVAdapter.notifyItemInserted(position);
+            invoiceRVAdapter.notifyDataSetChanged();
             menuRVAdapter.setSelected(position, true);
             menuRVAdapter.notifyDataSetChanged();
         } else {
@@ -259,12 +261,14 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
     }
 
+
+
     private void filter(String type) {
         for (DataItemMenu item : mDataItem) {
             if (item.get_itemType().equals("Car Wash")) {
-                dataCarWash.add(new DataItemMenu(item.get_itemID(), item.get_itemName(), String.valueOf(item.get_itemPrice()), item.get_itemVehicleType(), item.get_itemType(), item.isSelected()));
+                dataCarWash.add(new DataItemMenu(item.get_itemID(), item.get_itemName(), String.valueOf(item.get_itemPrice()), item.get_itemVehicleType(), item.get_itemType(), item.isSelected(), item.get_itemImage()));
             } else {
-                dataCarCare.add(new DataItemMenu(item.get_itemID(), item.get_itemName(), String.valueOf(item.get_itemPrice()), item.get_itemVehicleType(), item.get_itemType(), item.isSelected()));
+                dataCarCare.add(new DataItemMenu(item.get_itemID(), item.get_itemName(), String.valueOf(item.get_itemPrice()), item.get_itemVehicleType(), item.get_itemType(), item.isSelected(), item.get_itemImage()));
             }
         }
         mDataItem.clear();

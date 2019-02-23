@@ -59,6 +59,16 @@ public class DataItemMenu {
         this.selected = selected;
     }
 
+    public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemType, boolean selected, String _itemImage) {
+        this._itemID = _itemID;
+        this._itemName = _itemName;
+        this._itemPrice = _itemPrice;
+        this._itemVehicleType = _itemVehicleType;
+        this._itemType = _itemType;
+        this.selected = selected;
+        this._itemImage = _itemImage;
+    }
+
     public String get_itemName() {
         return _itemName;
     }
