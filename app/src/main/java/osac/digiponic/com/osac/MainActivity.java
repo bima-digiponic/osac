@@ -219,6 +219,15 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         Log.d("mDataItem", mDataItem.toString());
     }
 
+    /*
+        Method ini masih ngebug karena ketika user menekan item dengan cepat. ketika program masih looping
+       untuk nyari item buat di remove/di add, dia langsung ngejalanin loopingnya lagi sehingga mengubah
+       isi variable position yang sedang di looping. jadi kalo di klik cepet cepet masih ngebug.
+       solusinya pake sqlite, ketika user menekan item bukan dimasukkan ke mDataCart melainkan ke table
+       order di SQLite (belum diinisialisasi disini), Tetapi muncul kendala baru yaitu data tidak langsung
+        berubah secara real-time meskipun menggunakan notifyDataSetChanged.
+    */
+
     @Override
     public void onItemClick(View view, int position) {
         Locale localeID = new Locale("in", "ID");

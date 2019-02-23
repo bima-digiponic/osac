@@ -7,14 +7,19 @@ import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Printer;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import net.glxn.qrgen.android.QRCode;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import osac.digiponic.com.osac.R;
 
@@ -130,17 +135,20 @@ public class AdminActivity extends AppCompatActivity {
                 byte[] printformat = { 0x1B, 0*21, FONT_TYPE };
                 //outputStream.write(printformat);
 
-                //print title
+                Date date = Calendar.getInstance().getTime();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                SimpleDateFormat monthName = new SimpleDateFormat("dd MMMM yyyy");
+                String formattedDate = monthName.format(date);
+
+                // Print
                 printUnicode();
-                //print normal text
-                printCustom(message.getText().toString(),0,0);
-                printPhoto(R.drawable.img);
-                printNewLine();
-                printText("     >>>>   Thank you  <<<<     "); // total 32 char in a single line
-                //resetPrint(); //reset printer
+                printPhoto(R.drawable.downloadwhite);
+                printCustom(formattedDate, 0, 1);
+                printQRCode(message.getText().toString());
                 printUnicode();
                 printNewLine();
                 printNewLine();
+
 
                 outputStream.flush();
             } catch (IOException e) {
@@ -202,8 +210,27 @@ public class AdminActivity extends AppCompatActivity {
         try {
             Bitmap bmp = BitmapFactory.decodeResource(getResources(),
                     img);
+//            Bitmap resized = Bitmap.createBitmap(bmp, 0, 0, 200, 200);
+            Bitmap resizeImage = Bitmap.createScaledBitmap(bmp,(int) (bmp.getWidth() * 0.5), (int) (bmp.getHeight() * 0.5), true);
             if(bmp!=null){
-                byte[] command = Utils.decodeBitmap(bmp);
+                byte[] command = Utils.decodeBitmap(resizeImage);
+                outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+                printText(command);
+            }else{
+                Log.e("Print Photo error", "the file isn't exists");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("PrintTools", "the file isn't exists");
+        }
+    }
+
+    public void printQRCode(String text) {
+        try {
+            Bitmap bmp = QRCode.from(text).bitmap();
+            Bitmap resizeImage = Bitmap.createScaledBitmap(bmp,(int) (bmp.getWidth() * 2), (int) (bmp.getHeight() * 2), true);
+            if(bmp!=null){
+                byte[] command = Utils.decodeBitmap(resizeImage);
                 outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
                 printText(command);
             }else{

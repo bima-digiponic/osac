@@ -42,4 +42,7 @@ dependencies {
 
     // Picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
+
+    // Barcode
+    implementation 'com.github.kenglxn.QRGen:android:2.5.0'
 }

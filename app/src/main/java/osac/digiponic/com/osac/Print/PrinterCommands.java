@@ -22,10 +22,13 @@ public class PrinterCommands {
     public static byte[] FEED_LINE = {10};
 
     public static byte[] SELECT_FONT_A = {20, 33, 0};
+    public static byte[] SELECT_FONT_B = {0x1B,0x21,0x01};
 
     public static byte[] SET_BAR_CODE_HEIGHT = {29, 104, 100};
     public static byte[] PRINT_BAR_CODE_1 = {29, 107, 2};
     public static byte[] SEND_NULL_BYTE = {0x00};
+
+    public static byte[] FONT_LARGE_WITH_BOLD = {0x1B,0x21,0x10};
 
     public static byte[] SELECT_PRINT_SHEET = {0x1B, 0x63, 0x30, 0x02};
     public static byte[] FEED_PAPER_AND_CUT = {0x1D, 0x56, 66, 0x00};
