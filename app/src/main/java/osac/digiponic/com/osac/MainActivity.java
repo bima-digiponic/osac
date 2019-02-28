@@ -1,8 +1,11 @@
 package osac.digiponic.com.osac;
 
 import android.app.Dialog;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
@@ -26,6 +29,8 @@ import android.widget.Toast;
 
 import com.google.gson.JsonIOException;
 
+import net.glxn.qrgen.android.QRCode;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +42,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -53,6 +59,11 @@ import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import osac.digiponic.com.osac.Adapter.InvoiceRVAdapter;
 import osac.digiponic.com.osac.Adapter.MenuRVAdapter;
 import osac.digiponic.com.osac.Model.DataItemMenu;
+import osac.digiponic.com.osac.Model.DataServiceType;
+import osac.digiponic.com.osac.Model.DataVehicleType;
+import osac.digiponic.com.osac.Print.DeviceList;
+import osac.digiponic.com.osac.Print.PrinterCommands;
+import osac.digiponic.com.osac.Print.Utils;
 
 public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener {
 
@@ -61,12 +72,14 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private List<DataItemMenu> mDataCart = new ArrayList<>();
     private List<DataItemMenu> dataCarWash = new ArrayList<>();
     private List<DataItemMenu> dataCarCare = new ArrayList<>();
+    private List<DataVehicleType> mDataVehicleType = new ArrayList<>();
+    private List<DataServiceType> mDataServiceType = new ArrayList<>();
 
     // Content
     private RecyclerView recyclerView_Menu, recyclerView_Invoice;
     private ImageView emptyCart;
     private Spinner typeFilter;
-    private TextView total_tv, date_tv;
+    private TextView total_tv, date_tv, hidden_tv;
     private Dialog completeDialog, incompleteDialog, changeTypeDialog;
     private Button smallCar, mediumCar, bigCar, checkOutBtn;
     private SmoothProgressBar progressBar;
@@ -82,6 +95,11 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private String carType = "";
     private boolean resultChange;
     private String clickedType = "";
+    byte FONT_TYPE;
+    private static BluetoothSocket btsocket;
+    private static OutputStream outputStream;
+    int total = 0;
+
 
     // Constraint
     public static final int CONNECTION_TIMEOUT = 10000;
@@ -121,6 +139,17 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         progressBar = findViewById(R.id.progress_bar);
         blackLayout = findViewById(R.id.loading_layout);
 
+        // Setup Hidden Function
+        hidden_tv = findViewById(R.id.textView_invoice);
+        hidden_tv.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Toast.makeText(MainActivity.this, "Setup Page", Toast.LENGTH_SHORT).show();
+                toSetting();
+                return false;
+            }
+        });
+
         // Set Checkout Button
         checkOutBtn = findViewById(R.id.btn_checkout);
         checkOutBtn.setOnClickListener(new View.OnClickListener() {
@@ -134,11 +163,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                         if (mDataCart.size() == 0) {
                             incompleteDialog.show();
                         } else {
-                            completeDialog.show();
+                            new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/api/public/transaction");
+                            total_tv.setText("Rp. 0");
                         }
-                        new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/public/transaction");
-                        dataCartClear();
-                        total_tv.setText("Rp. 0");
+
                         Log.d("datacartsize", String.valueOf(mDataCart.size()));
                     }
                 }, 3000);
@@ -217,6 +245,253 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Get Data From API
         new Async_GetData().execute(carType);
         Log.d("mDataItem", mDataItem.toString());
+        new Async_GetDataGeneralVehicleType().execute("types", "Vehicle");
+        new Async_GetDataGeneralServiceType().execute("types", "Service");
+    }
+
+    // Method bellow are used to support printing for thermal printer
+
+    private void toSetting() {
+        Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
+        this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
+    }
+
+    private void printInvoice() {
+        if (btsocket == null) {
+            Toast.makeText(this, "No Bluetooth Setup Found.", Toast.LENGTH_SHORT).show();
+//            Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
+//            this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
+        } else {
+            OutputStream opstream = null;
+            try {
+                opstream = btsocket.getOutputStream();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            outputStream = opstream;
+
+            //print command
+            try {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                outputStream = btsocket.getOutputStream();
+
+                byte[] printformat = {0x1B, 0 * 21, FONT_TYPE};
+                //outputStream.write(printformat);
+
+                Date date = Calendar.getInstance().getTime();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                SimpleDateFormat monthName = new SimpleDateFormat("dd MMMM yyyy");
+                String formattedDate = monthName.format(date);
+
+                // Print
+                printUnicode();
+                printPhoto(R.drawable.downloadwhite);
+                printCustom(formattedDate, 0, 1);
+//                printQRCode(message.getText().toString());
+                printUnicode();
+                printNewLine();
+                printNewLine();
+
+
+                outputStream.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //print custom
+    private void printCustom(String msg, int size, int align) {
+        //Print config "mode"
+        byte[] cc = new byte[]{0x1B, 0x21, 0x03};  // 0- normal size text
+        //byte[] cc1 = new byte[]{0x1B,0x21,0x00};  // 0- normal size text
+        byte[] bb = new byte[]{0x1B, 0x21, 0x08};  // 1- only bold text
+        byte[] bb2 = new byte[]{0x1B, 0x21, 0x20}; // 2- bold with medium text
+        byte[] bb3 = new byte[]{0x1B, 0x21, 0x10}; // 3- bold with large text
+        try {
+            switch (size) {
+                case 0:
+                    outputStream.write(cc);
+                    break;
+                case 1:
+                    outputStream.write(bb);
+                    break;
+                case 2:
+                    outputStream.write(bb2);
+                    break;
+                case 3:
+                    outputStream.write(bb3);
+                    break;
+            }
+
+            switch (align) {
+                case 0:
+                    //left align
+                    outputStream.write(PrinterCommands.ESC_ALIGN_LEFT);
+                    break;
+                case 1:
+                    //center align
+                    outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+                    break;
+                case 2:
+                    //right align
+                    outputStream.write(PrinterCommands.ESC_ALIGN_RIGHT);
+                    break;
+            }
+            outputStream.write(msg.getBytes());
+            outputStream.write(PrinterCommands.LF);
+            //outputStream.write(cc);
+            //printNewLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //print photo
+    public void printPhoto(int img) {
+        try {
+            Bitmap bmp = BitmapFactory.decodeResource(getResources(),
+                    img);
+//            Bitmap resized = Bitmap.createBitmap(bmp, 0, 0, 200, 200);
+            Bitmap resizeImage = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 0.5), (int) (bmp.getHeight() * 0.5), true);
+            if (bmp != null) {
+                byte[] command = Utils.decodeBitmap(resizeImage);
+                outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+                printText(command);
+            } else {
+                Log.e("Print Photo error", "the file isn't exists");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("PrintTools", "the file isn't exists");
+        }
+    }
+
+    public void printQRCode(String text) {
+        try {
+            Bitmap bmp = QRCode.from(text).bitmap();
+            Bitmap resizeImage = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 2), (int) (bmp.getHeight() * 2), true);
+            if (bmp != null) {
+                byte[] command = Utils.decodeBitmap(resizeImage);
+                outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+                printText(command);
+            } else {
+                Log.e("Print Photo error", "the file isn't exists");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("PrintTools", "the file isn't exists");
+        }
+    }
+
+    //print unicode
+    public void printUnicode() {
+        try {
+            outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+            printText(Utils.UNICODE_TEXT);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    //print new line
+    private void printNewLine() {
+        try {
+            outputStream.write(PrinterCommands.FEED_LINE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void resetPrint() {
+        try {
+            outputStream.write(PrinterCommands.ESC_FONT_COLOR_DEFAULT);
+            outputStream.write(PrinterCommands.FS_FONT_ALIGN);
+            outputStream.write(PrinterCommands.ESC_ALIGN_LEFT);
+            outputStream.write(PrinterCommands.ESC_CANCEL_BOLD);
+            outputStream.write(PrinterCommands.LF);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //print text
+    private void printText(String msg) {
+        try {
+            // Print normal text
+            outputStream.write(msg.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //print byte[]
+    private void printText(byte[] msg) {
+        try {
+            // Print normal text
+            outputStream.write(msg);
+            printNewLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private String leftRightAlign(String str1, String str2) {
+        String ans = str1 + str2;
+        if (ans.length() < 31) {
+            int n = (31 - str1.length() + str2.length());
+            ans = str1 + new String(new char[n]).replace("\0", " ") + str2;
+        }
+        return ans;
+    }
+
+
+    private String[] getDateTime() {
+        final Calendar c = Calendar.getInstance();
+        String dateTime[] = new String[2];
+        dateTime[0] = c.get(Calendar.DAY_OF_MONTH) + "/" + c.get(Calendar.MONTH) + "/" + c.get(Calendar.YEAR);
+        dateTime[1] = c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE);
+        return dateTime;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            if (btsocket != null) {
+                outputStream.close();
+                btsocket.close();
+                btsocket = null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        try {
+            btsocket = DeviceList.getSocket();
+            if (btsocket != null) {
+//                printText(message.getText().toString());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -231,12 +506,14 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     @Override
     public void onItemClick(View view, int position) {
         Log.d("itempositiondebug", String.valueOf(position));
-        Log.d("itempositionname",String.valueOf(menuRVAdapter.getItemName(position) +  menuRVAdapter.getItemPrice(position)));
+        Log.d("itempositionname", String.valueOf(menuRVAdapter.getItemName(position) + menuRVAdapter.getItemPrice(position)));
         Locale localeID = new Locale("in", "ID");
         NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
-        int total = 0;
+        total = 0;
         if (!menuRVAdapter.isSelected(position)) {
-            mDataCart.add(new DataItemMenu(menuRVAdapter.getItemName(position), menuRVAdapter.getItemPrice(position)));
+            mDataCart.add(new DataItemMenu(menuRVAdapter.getItemID(position), menuRVAdapter.getItemName(position),
+                    menuRVAdapter.getItemPrice(position), menuRVAdapter.getItemVehicleType(position),
+                    menuRVAdapter.getItemType(position), menuRVAdapter.getItemImage(position)));
             invoiceRVAdapter.notifyDataSetChanged();
             menuRVAdapter.setSelected(position, true);
             menuRVAdapter.notifyDataSetChanged();
@@ -260,7 +537,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             total_tv.setText(formatRupiah.format((double) total));
         }
     }
-
 
 
     private void filter(String type) {
@@ -423,6 +699,192 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
     }
 
+    // Get Data General Vehicle Type
+    private class Async_GetDataGeneralVehicleType extends AsyncTask<String, String, String> {
+
+        // Variable
+        HttpURLConnection conn;
+        URL url = null;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            // Background process, Fetching data from API
+            String getBy = params[0];
+            String value = params[1];
+            try {
+                url = new URL("http://app.digiponic.co.id/osac/api/public/generals?" + getBy + "=" + value);
+                Log.d("ConenctionTest", "connected url : " + url.toString());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                Log.d("ConenctionTest", "error url");
+                return "exception";
+            }
+            try {
+                // Setup HttpURLConnection
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(READ_TIMEOUT);
+                conn.setConnectTimeout(CONNECTION_TIMEOUT);
+                conn.setRequestMethod("GET");
+                conn.connect();
+                Log.d("ConenctionTest", "connected");
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                Log.d("ConenctionTest", "not connected");
+                return e1.toString();
+            }
+            try {
+                int response_code = conn.getResponseCode();
+
+                // Check Response Code
+                if (response_code == HttpURLConnection.HTTP_OK) {
+                    //Read data sent from server
+                    Log.d("ResponseCode", String.valueOf(response_code));
+                    InputStream input = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    StringBuilder result = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
+                    String resultFromServer = "";
+                    JSONObject jsonObject = null;
+                    JSONArray jsonArray = null;
+                    try {
+                        jsonArray = new JSONArray(result.toString());
+                        Log.d("resultdariserver", result.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    int jLoop = 0;
+                    while (jLoop < jsonArray.length()) {
+                        jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
+                        mDataVehicleType.add(new DataVehicleType(jsonObject.getString("id"),
+                                jsonObject.getString("type"), jsonObject.getString("name"),
+                                jsonObject.getString("desc")));
+                        jLoop += 1;
+                    }
+                    return (resultFromServer);
+                } else {
+                    return ("unsuccessful");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "exception";
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                conn.disconnect();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            setAdapterRV();
+            blackLayout.setVisibility(View.GONE);
+            dataFetched = true;
+        }
+    }
+
+    // Get Data General Vehicle Type
+    private class Async_GetDataGeneralServiceType extends AsyncTask<String, String, String> {
+
+        // Variable
+        HttpURLConnection conn;
+        URL url = null;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            // Background process, Fetching data from API
+            String getBy = params[0];
+            String value = params[1];
+            try {
+                url = new URL("http://app.digiponic.co.id/osac/api/public/generals?" + getBy + "=" + value);
+                Log.d("ConenctionTest", "connected url : " + url.toString());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                Log.d("ConenctionTest", "error url");
+                return "exception";
+            }
+            try {
+                // Setup HttpURLConnection
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(READ_TIMEOUT);
+                conn.setConnectTimeout(CONNECTION_TIMEOUT);
+                conn.setRequestMethod("GET");
+                conn.connect();
+                Log.d("ConenctionTest", "connected");
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                Log.d("ConenctionTest", "not connected");
+                return e1.toString();
+            }
+            try {
+                int response_code = conn.getResponseCode();
+
+                // Check Response Code
+                if (response_code == HttpURLConnection.HTTP_OK) {
+                    //Read data sent from server
+                    Log.d("ResponseCode", String.valueOf(response_code));
+                    InputStream input = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    StringBuilder result = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
+                    String resultFromServer = "";
+                    JSONObject jsonObject = null;
+                    JSONArray jsonArray = null;
+                    try {
+                        jsonArray = new JSONArray(result.toString());
+                        Log.d("resultdariserver", result.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    int jLoop = 0;
+                    while (jLoop < jsonArray.length()) {
+                        jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
+                        mDataServiceType.add(new DataServiceType(jsonObject.getString("id"),
+                                jsonObject.getString("type"), jsonObject.getString("name"),
+                                jsonObject.getString("desc")));
+                        jLoop += 1;
+                    }
+                    return (resultFromServer);
+                } else {
+                    return ("unsuccessful");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "exception";
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                conn.disconnect();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            setAdapterRV();
+            blackLayout.setVisibility(View.GONE);
+            dataFetched = true;
+        }
+    }
+
     // Post Data
     public class HTTPAsyncTaskPOSTData extends AsyncTask<String, Void, String> {
         @Override
@@ -449,6 +911,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
+            printInvoice();
+            dataCartClear();
+            completeDialog.show();
+
         }
 
         private String HttpPost(String myUrl) throws IOException, JSONException {
@@ -488,7 +954,11 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private JSONObject createJSON() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
-        int total_price = 0;
+        // Get IDs
+        int typesID = 0, serviceID = 0;
+
+
+        int total_price = total;
         int discount = 0;
         if (mDataCart.size() > 0) {
             for (DataItemMenu item : mDataCart) {
@@ -507,10 +977,27 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             //JsonArr
             JSONArray jsonArray = new JSONArray();
             for (DataItemMenu item : mDataCart) {
+                // Set IDs
+                Log.d("jumlahVT", String.valueOf(mDataVehicleType.size()));
+                for (DataVehicleType typesItem : mDataVehicleType) {
+                    Log.d("postTypesEq", String.valueOf(item.get_itemVehicleType() + typesItem.getName()));
+                    if (item.get_itemVehicleType().equals(typesItem.getName())) {
+                        typesID = Integer.parseInt(typesItem.getId());
+                        Log.d("postTypesID", String.valueOf(typesID));
+                    }
+                }
+
+                for (DataServiceType serviceType : mDataServiceType) {
+                    Log.d("postService", String.valueOf(item.get_itemType() + serviceType.getName()));
+                    if (item.get_itemType().equals(serviceType.getName())) {
+                        serviceID = Integer.parseInt(serviceType.getId());
+                    }
+                }
+
                 JSONObject pnObj = new JSONObject();
-                pnObj.accumulate("types_id", 0);
-                pnObj.accumulate("types_name", "Car Wash");
-                pnObj.accumulate("services_id", 2);
+                pnObj.accumulate("types_id", typesID);
+                pnObj.accumulate("types_name", item.get_itemType());
+                pnObj.accumulate("services_id", serviceID);
                 pnObj.accumulate("services_name", item.get_itemName());
                 pnObj.accumulate("service_price", item.get_itemPrice());
                 jsonArray.put(pnObj);

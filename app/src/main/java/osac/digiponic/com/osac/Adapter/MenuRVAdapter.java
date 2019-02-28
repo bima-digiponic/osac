@@ -47,6 +47,11 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         Locale localeID = new Locale("in", "ID");
         NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
         viewHolder._itemPrice.setText(formatRupiah.format((double)data.get_itemPrice()));
+        viewHolder._itemName.setSelected(true);
+        viewHolder._itemPrice.setSelected(true);
+        if (i == 2) {
+            viewHolder._itemName.setText("Single line that makes TextView scroll if too long");
+        }
         if (isSelected(i)) {
             viewHolder._deleteLayout.setVisibility(View.VISIBLE);
         } else {
@@ -54,46 +59,16 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         }
 //        Log.d("urlimageimage", data.get_itemImage());
         Picasso.get().load(data.get_itemImage()).into(viewHolder._itemImage);
-//        switch (Integer.parseInt(data.get_itemID())) {
-//            case 7:
-//                viewHolder._itemImage.setImageResource(R.drawable.ganti_ban);
-//                break;
-//            case 8:
-//                viewHolder._itemImage.setImageResource(R.drawable.cuci_salju);
-//                break;
-//            case 3:
-//                viewHolder._itemImage.setImageResource(R.drawable.cuci_mobil_kering);
-//                break;
-//            case 4:
-//                viewHolder._itemImage.setImageResource(R.drawable.cuci_body);
-//                break;
-//            case 6:
-//                viewHolder._itemImage.setImageResource(R.drawable.ganti_oli);
-//                break;
-//            case 2:
-//                viewHolder._itemImage.setImageResource(R.drawable.cuci_mobil_kering);
-//                break;
-//            case 5:
-//                viewHolder._itemImage.setImageResource(R.drawable.poles_body);
-//                break;
-//        }
 
-        switch (data.get_itemVehicleType()) {
-            case "Small":
-                viewHolder._itemImage.setImageResource(R.drawable.small);
-                break;
-            case "Medium":
-                viewHolder._itemImage.setImageResource(R.drawable.medium);
-                break;
-            case "Big":
-                viewHolder._itemImage.setImageResource(R.drawable.big);
-                break;
-        }
     }
 
     @Override
     public int getItemCount() {
         return mDataItem.size();
+    }
+
+    public String getItemID(int id) {
+        return String.valueOf(mDataItem.get(id).get_itemID());
     }
 
     public String getItemName(int id) {
@@ -102,6 +77,19 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
 
     public String getItemPrice(int id) {
         return String.valueOf(mDataItem.get(id).get_itemPrice());
+    }
+
+    public String getItemVehicleType(int id) {
+        return String.valueOf(mDataItem.get(id).get_itemVehicleType());
+    }
+
+    public String getItemType(int id) {
+        return String.valueOf(mDataItem.get(id).get_itemType());
+    }
+
+    public String getItemImage(int id) {
+        return String.valueOf(mDataItem.get(id).get_itemImage());
+
     }
 
     public void setSelected(int id, boolean input) {

@@ -7,16 +7,16 @@
         android:id="@+id/layout_invoice_delete"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="10dp"
         android:background="@color/transparentBlack_50"
         android:translationZ="10dp"
-        android:layout_margin="10dp"
         android:visibility="gone">
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="40dp"
             android:layout_marginBottom="10dp"
+            android:padding="40dp"
             android:src="@drawable/x_icon" />
 
 
@@ -37,35 +37,47 @@
                 android:id="@+id/img_itemImg"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
-                android:scaleType="fitCenter"
+                android:scaleType="centerCrop"
                 android:src="@drawable/empty_cart" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/img_itemImg"
-                android:orientation="vertical"
                 android:layout_marginTop="10dp"
+                android:orientation="vertical"
                 android:padding="10dp">
 
                 <TextView
                     android:id="@+id/text_itemName"
-                    android:autoSizeTextType="uniform"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/img_itemImg"
+                    android:autoSizeTextType="uniform"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
                     android:padding="5dp"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
                     android:text="Nama Jasa"
-                    android:textStyle="bold"
                     android:textColor="@color/colorPrimary"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/text_itemPrice"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/text_itemName"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
                     android:padding="3dp"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
                     android:text="Rp. 1000"
                     android:textSize="18sp" />
 
