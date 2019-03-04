@@ -59,6 +59,7 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         }
 //        Log.d("urlimageimage", data.get_itemImage());
         Picasso.get().load(data.get_itemImage()).into(viewHolder._itemImage);
+        Log.d("ImagesimagesDEBUg", String.valueOf(viewHolder._itemImage));
 
     }
 
