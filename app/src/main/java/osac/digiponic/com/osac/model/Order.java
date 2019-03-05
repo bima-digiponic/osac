@@ -1,4 +1,4 @@
-package osac.digiponic.com.osac.Model;
+package osac.digiponic.com.osac.model;
 
 public class Order {
 

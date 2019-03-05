@@ -1,4 +1,4 @@
-package osac.digiponic.com.osac.Helper;
+package osac.digiponic.com.osac.helper;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -8,8 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-import osac.digiponic.com.osac.Model.DataItemMenu;
-import osac.digiponic.com.osac.Model.Order;
+import osac.digiponic.com.osac.model.DataItemMenu;
+import osac.digiponic.com.osac.model.Order;
 
 public class DatabaseHelperOrder extends SQLiteOpenHelper {
 

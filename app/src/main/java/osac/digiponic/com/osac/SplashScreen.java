@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import osac.digiponic.com.osac.view.ui.MainActivity;
+
 public class SplashScreen extends AppCompatActivity {
 
     @Override

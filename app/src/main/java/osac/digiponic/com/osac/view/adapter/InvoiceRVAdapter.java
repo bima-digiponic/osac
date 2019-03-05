@@ -1,4 +1,4 @@
-package osac.digiponic.com.osac.Adapter;
+package osac.digiponic.com.osac.view.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -13,7 +13,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
-import osac.digiponic.com.osac.Model.DataItemMenu;
+import osac.digiponic.com.osac.model.DataItemMenu;
 import osac.digiponic.com.osac.R;
 
 public class InvoiceRVAdapter extends RecyclerView.Adapter<InvoiceRVAdapter.ViewHolder> {

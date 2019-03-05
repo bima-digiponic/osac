@@ -1,4 +1,4 @@
-package osac.digiponic.com.osac.Adapter;
+package osac.digiponic.com.osac.view.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -15,10 +15,11 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import osac.digiponic.com.osac.Model.DataItemMenu;
+import osac.digiponic.com.osac.model.DataItemMenu;
 import osac.digiponic.com.osac.R;
 
 public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder> {
@@ -46,7 +47,7 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         viewHolder._itemName.setText(data.get_itemName());
         Locale localeID = new Locale("in", "ID");
         NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
-        viewHolder._itemPrice.setText(formatRupiah.format((double)data.get_itemPrice()));
+        viewHolder._itemPrice.setText(formatRupiah.format((double) data.get_itemPrice()));
         viewHolder._itemName.setSelected(true);
         viewHolder._itemPrice.setSelected(true);
         if (i == 2) {
@@ -65,7 +66,10 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return mDataItem.size();
+        if (mDataItem != null) {
+            return mDataItem.size();
+        }
+        return 0;
     }
 
     public String getItemID(int id) {
@@ -114,6 +118,7 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         public TextView _itemName, _itemPrice;
         public LinearLayout _deleteLayout;
         public ImageView _itemImage;
+
         public ViewHolder(View v) {
             super(v);
             v.setOnClickListener(this);
@@ -127,12 +132,8 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         @Override
         public void onClick(View v) {
             if (mClickListener != null) mClickListener.onItemClick(v, getAdapterPosition());
-
-
-
         }
     }
-
 
 
 }

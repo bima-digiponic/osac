@@ -1,4 +1,4 @@
-package osac.digiponic.com.osac.Model;
+package osac.digiponic.com.osac.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

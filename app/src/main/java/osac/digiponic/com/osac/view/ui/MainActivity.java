@@ -1,6 +1,8 @@
-package osac.digiponic.com.osac;
+package osac.digiponic.com.osac.view.ui;
 
 import android.app.Dialog;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -10,16 +12,14 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,35 +35,32 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
-import osac.digiponic.com.osac.Adapter.InvoiceRVAdapter;
-import osac.digiponic.com.osac.Adapter.MenuRVAdapter;
-import osac.digiponic.com.osac.Model.DataItemMenu;
-import osac.digiponic.com.osac.Model.DataServiceType;
-import osac.digiponic.com.osac.Model.DataVehicleType;
-import osac.digiponic.com.osac.Print.DeviceList;
-import osac.digiponic.com.osac.Print.PrinterCommands;
-import osac.digiponic.com.osac.Print.Utils;
+import osac.digiponic.com.osac.R;
+import osac.digiponic.com.osac.view.adapter.InvoiceRVAdapter;
+import osac.digiponic.com.osac.view.adapter.MenuRVAdapter;
+import osac.digiponic.com.osac.model.DataItemMenu;
+import osac.digiponic.com.osac.model.DataServiceType;
+import osac.digiponic.com.osac.model.DataVehicleType;
+import osac.digiponic.com.osac.print.DeviceList;
+import osac.digiponic.com.osac.print.PrinterCommands;
+import osac.digiponic.com.osac.print.Utils;
+import osac.digiponic.com.osac.viewmodel.MainActivityViewModel;
 
 public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener {
 
@@ -75,8 +72,11 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private List<DataVehicleType> mDataVehicleType = new ArrayList<>();
     private List<DataServiceType> mDataServiceType = new ArrayList<>();
 
+    // View Model
+    private MainActivityViewModel mMainActivityViewModel;
+
     // Content
-    private RecyclerView recyclerView_Menu, recyclerView_Invoice;
+    private RecyclerView recyclerView_Menu, recyclerView_carWash, recyclerView_carCare, recyclerView_Invoice;
     private ImageView emptyCart;
     private Spinner typeFilter;
     private TextView total_tv, date_tv, hidden_tv;
@@ -87,6 +87,8 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     // Adapter
     private MenuRVAdapter menuRVAdapter;
+    private MenuRVAdapter carWashRVAdapter;
+    private MenuRVAdapter carCareRVAdapter;
     private InvoiceRVAdapter invoiceRVAdapter;
 
     // Variable
@@ -112,6 +114,38 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
         // Lock Screen to Horizontal
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Initialize View Model
+        mMainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+        mMainActivityViewModel.init();
+
+
+
+        // Get Data From View Model
+        mMainActivityViewModel.getmMenuData().observe(this, new Observer<List<DataItemMenu>>() {
+            @Override
+            public void onChanged(@Nullable List<DataItemMenu> dataItemMenus) {
+                // Notify Adapter
+                menuRVAdapter.notifyDataSetChanged();
+            }
+        });
+
+        mMainActivityViewModel.getmServiceData().observe(this, new Observer<List<DataServiceType>>() {
+            @Override
+            public void onChanged(@Nullable List<DataServiceType> dataServiceTypes) {
+
+            }
+        });
+
+        mMainActivityViewModel.getmVehicleData().observe(this, new Observer<List<DataVehicleType>>() {
+            @Override
+            public void onChanged(@Nullable List<DataVehicleType> dataVehicleTypes) {
+
+            }
+        });
+
+        //
+        setAdapterRV();
 
         // Initialize TextView Total
         total_tv = findViewById(R.id.total_textview_main);
@@ -172,80 +206,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                 }, 3000);
             }
         });
-
-//        // Button Select
-//        smallCar = findViewById(R.id.btn_smallCar);
-//        mediumCar = findViewById(R.id.btn_mediumCar);
-
-        // Set State
-//        checkState();
-
-//        // Set Button onClick
-//        smallCar.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                clickedType = "Small";
-//                changeTypeDialog.show();
-//            }
-//        });
-//        mediumCar.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                clickedType = "Medium";
-//                changeTypeDialog.show();
-//            }
-//        });
-//        bigCar.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                clickedType = "Big";
-//                changeTypeDialog.show();
-//            }
-//        });
-
-//        // Setup Spinner
-//        typeFilter = findViewById(R.id.spinner_filterType);
-//        String[] serviceType = new String[]{
-//                "Semua Jasa", "Car Wash", "Car Care"
-//        };
-//        final List<String> serviceList = new ArrayList<>(Arrays.asList(serviceType));
-//        final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-//                this, R.layout.spinner_item, serviceList) {
-//            @Override
-//            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-//                View view = super.getDropDownView(position, convertView, parent);
-//                TextView textView = (TextView) view;
-//                textView.setTextColor(Color.BLACK);
-//                return view;
-//            }
-//        };
-//        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
-//        typeFilter.setAdapter(spinnerArrayAdapter);
-//        typeFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                if (position == 1) {
-//                    filter("Car Wash");
-//                } else if (position == 2) {
-//                    filter("Car Care");
-//                } else if (position == 0) {
-//                    filter("All");
-//                }
-//                if (dataFetched) {
-//                    menuRVAdapter.notifyDataSetChanged();
-//                }
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//            }
-//        });
-
-        // Get Data From API
-        new Async_GetData().execute(carType);
-        Log.d("mDataItem", mDataItem.toString());
-        new Async_GetDataGeneralVehicleType().execute("types", "Vehicle");
-        new Async_GetDataGeneralServiceType().execute("types", "Service");
     }
 
     // Method bellow are used to support printing for thermal printer
@@ -493,6 +453,8 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
     }
 
+    //==========================================================================================================================
+
 
     @Override
     public void onItemClick(View view, int position) {
@@ -529,38 +491,25 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
     }
 
-
-    private void filter(String type) {
-        for (DataItemMenu item : mDataItem) {
-            if (item.get_itemType().equals("Car Wash")) {
-                dataCarWash.add(new DataItemMenu(item.get_itemID(), item.get_itemName(), String.valueOf(item.get_itemPrice()), item.get_itemVehicleType(), item.get_itemType(), item.isSelected(), item.get_itemImage()));
-            } else {
-                dataCarCare.add(new DataItemMenu(item.get_itemID(), item.get_itemName(), String.valueOf(item.get_itemPrice()), item.get_itemVehicleType(), item.get_itemType(), item.isSelected(), item.get_itemImage()));
-            }
-        }
-        mDataItem.clear();
-        if (type.equals("Car Wash")) {
-            mDataItem.addAll(dataCarWash);
-            dataCarWash.clear();
-        } else if (type.equals("Car Care")) {
-            mDataItem.addAll(dataCarCare);
-            dataCarCare.clear();
-        } else {
-            mDataItem.addAll(dataCarCare);
-            mDataItem.addAll(dataCarWash);
-            dataCarCare.clear();
-            dataCarWash.clear();
-        }
-    }
-
     private void setAdapterRV() {
         // Setup Menu Recyclerview
-        recyclerView_Menu = findViewById(R.id.rv_menu);
-        int numberOfColumns = 4;
-        recyclerView_Menu.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
-        menuRVAdapter = new MenuRVAdapter(this, mDataItem);
+        recyclerView_Menu = findViewById(R.id.rv_recommended);
+        recyclerView_Menu.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        menuRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuData().getValue());
         menuRVAdapter.setClickListener(this);
         recyclerView_Menu.setAdapter(menuRVAdapter);
+
+        recyclerView_carWash = findViewById(R.id.rv_car_wash);
+        recyclerView_carWash.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        carWashRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuData().getValue());
+        carWashRVAdapter.setClickListener(this);
+        recyclerView_carWash.setAdapter(carWashRVAdapter);
+
+        recyclerView_carCare = findViewById(R.id.rv_car_care);
+        recyclerView_carCare.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        carCareRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuData().getValue());
+        carCareRVAdapter.setClickListener(this);
+        recyclerView_carCare.setAdapter(carCareRVAdapter);
 
         // Setup Invoice Recyclerview
         recyclerView_Invoice = findViewById(R.id.rv_invoiceItem);
@@ -588,292 +537,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                 checkEmpty();
             }
         });
-    }
-
-    // Get Data
-    private class Async_GetData extends AsyncTask<String, String, String> {
-
-        // Variable
-        HttpURLConnection conn;
-        URL url = null;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // Clear data before execute
-            mDataItem.clear();
-            dataCarCare.clear();
-            dataCarWash.clear();
-            mDataCart.clear();
-            blackLayout.setVisibility(View.VISIBLE);
-            total_tv.setText("Rp. 0");
-            resultChange = false;
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            // Background process, Fetching data from API
-            String carType = params[0];
-            try {
-                url = new URL("http://app.digiponic.co.id/osac/api/public/service?vehicle=" + carType);
-                Log.d("ConenctionTest", "connected url : " + url.toString());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                Log.d("ConenctionTest", "error url");
-                return "exception";
-            }
-            try {
-                // Setup HttpURLConnection
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(READ_TIMEOUT);
-                conn.setConnectTimeout(CONNECTION_TIMEOUT);
-                conn.setRequestMethod("GET");
-                conn.connect();
-                Log.d("ConenctionTest", "connected");
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                Log.d("ConenctionTest", "not connected");
-                return e1.toString();
-            }
-            try {
-                int response_code = conn.getResponseCode();
-
-                // Check Response Code
-                if (response_code == HttpURLConnection.HTTP_OK) {
-                    //Read data sent from server
-                    Log.d("ResponseCode", String.valueOf(response_code));
-                    InputStream input = conn.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    StringBuilder result = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        result.append(line);
-                    }
-                    String resultFromServer = "";
-                    JSONObject jsonObject = null;
-                    JSONArray jsonArray = null;
-                    try {
-                        jsonArray = new JSONArray(result.toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    int jLoop = 0;
-                    while (jLoop < jsonArray.length()) {
-                        jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
-                        mDataItem.add(new DataItemMenu(jsonObject.getString("id"),
-                                jsonObject.getString("name"), jsonObject.getString("price"),
-                                jsonObject.getString("vehicle"), jsonObject.getString("type"),
-                                jsonObject.getString("images")));
-                        jLoop += 1;
-                    }
-                    return (resultFromServer);
-                } else {
-                    return ("unsuccessful");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return "exception";
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } finally {
-                conn.disconnect();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            setAdapterRV();
-            blackLayout.setVisibility(View.GONE);
-            dataFetched = true;
-        }
-    }
-
-    // Get Data General Vehicle Type
-    private class Async_GetDataGeneralVehicleType extends AsyncTask<String, String, String> {
-
-        // Variable
-        HttpURLConnection conn;
-        URL url = null;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            // Background process, Fetching data from API
-            String getBy = params[0];
-            String value = params[1];
-            try {
-                url = new URL("http://app.digiponic.co.id/osac/api/public/generals?" + getBy + "=" + value);
-                Log.d("ConenctionTest", "connected url : " + url.toString());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                Log.d("ConenctionTest", "error url");
-                return "exception";
-            }
-            try {
-                // Setup HttpURLConnection
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(READ_TIMEOUT);
-                conn.setConnectTimeout(CONNECTION_TIMEOUT);
-                conn.setRequestMethod("GET");
-                conn.connect();
-                Log.d("ConenctionTest", "connected");
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                Log.d("ConenctionTest", "not connected");
-                return e1.toString();
-            }
-            try {
-                int response_code = conn.getResponseCode();
-
-                // Check Response Code
-                if (response_code == HttpURLConnection.HTTP_OK) {
-                    //Read data sent from server
-                    Log.d("ResponseCode", String.valueOf(response_code));
-                    InputStream input = conn.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    StringBuilder result = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        result.append(line);
-                    }
-                    String resultFromServer = "";
-                    JSONObject jsonObject = null;
-                    JSONArray jsonArray = null;
-                    try {
-                        jsonArray = new JSONArray(result.toString());
-                        Log.d("resultdariserver", result.toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    int jLoop = 0;
-                    while (jLoop < jsonArray.length()) {
-                        jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
-                        mDataVehicleType.add(new DataVehicleType(jsonObject.getString("id"),
-                                jsonObject.getString("type"), jsonObject.getString("name"),
-                                jsonObject.getString("desc")));
-                        jLoop += 1;
-                    }
-                    return (resultFromServer);
-                } else {
-                    return ("unsuccessful");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return "exception";
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } finally {
-                conn.disconnect();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            setAdapterRV();
-            blackLayout.setVisibility(View.GONE);
-            dataFetched = true;
-        }
-    }
-
-    // Get Data General Vehicle Type
-    private class Async_GetDataGeneralServiceType extends AsyncTask<String, String, String> {
-
-        // Variable
-        HttpURLConnection conn;
-        URL url = null;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            // Background process, Fetching data from API
-            String getBy = params[0];
-            String value = params[1];
-            try {
-                url = new URL("http://app.digiponic.co.id/osac/api/public/generals?" + getBy + "=" + value);
-                Log.d("ConenctionTest", "connected url : " + url.toString());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                Log.d("ConenctionTest", "error url");
-                return "exception";
-            }
-            try {
-                // Setup HttpURLConnection
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(READ_TIMEOUT);
-                conn.setConnectTimeout(CONNECTION_TIMEOUT);
-                conn.setRequestMethod("GET");
-                conn.connect();
-                Log.d("ConenctionTest", "connected");
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                Log.d("ConenctionTest", "not connected");
-                return e1.toString();
-            }
-            try {
-                int response_code = conn.getResponseCode();
-
-                // Check Response Code
-                if (response_code == HttpURLConnection.HTTP_OK) {
-                    //Read data sent from server
-                    Log.d("ResponseCode", String.valueOf(response_code));
-                    InputStream input = conn.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    StringBuilder result = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        result.append(line);
-                    }
-                    String resultFromServer = "";
-                    JSONObject jsonObject = null;
-                    JSONArray jsonArray = null;
-                    try {
-                        jsonArray = new JSONArray(result.toString());
-                        Log.d("resultdariserver", result.toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    int jLoop = 0;
-                    while (jLoop < jsonArray.length()) {
-                        jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
-                        mDataServiceType.add(new DataServiceType(jsonObject.getString("id"),
-                                jsonObject.getString("type"), jsonObject.getString("name"),
-                                jsonObject.getString("desc")));
-                        jLoop += 1;
-                    }
-                    return (resultFromServer);
-                } else {
-                    return ("unsuccessful");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return "exception";
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } finally {
-                conn.disconnect();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            setAdapterRV();
-            blackLayout.setVisibility(View.GONE);
-            dataFetched = true;
-        }
     }
 
     // Post Data
@@ -969,17 +632,13 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             JSONArray jsonArray = new JSONArray();
             for (DataItemMenu item : mDataCart) {
                 // Set IDs
-                Log.d("jumlahVT", String.valueOf(mDataVehicleType.size()));
                 for (DataVehicleType typesItem : mDataVehicleType) {
-                    Log.d("postTypesEq", String.valueOf(item.get_itemVehicleType() + typesItem.getName()));
                     if (item.get_itemVehicleType().equals(typesItem.getName())) {
                         typesID = Integer.parseInt(typesItem.getId());
-                        Log.d("postTypesID", String.valueOf(typesID));
                     }
                 }
 
                 for (DataServiceType serviceType : mDataServiceType) {
-                    Log.d("postService", String.valueOf(item.get_itemType() + serviceType.getName()));
                     if (item.get_itemType().equals(serviceType.getName())) {
                         serviceID = Integer.parseInt(serviceType.getId());
                     }
@@ -1096,33 +755,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             public void onClick(View v) {
                 resultChange = true;
                 changeTypeDialog.dismiss();
-//                changeType(clickedType);
             }
         });
     }
-
-//    private void changeType(String type) {
-//        switch (type) {
-//            case "Small":
-//                pageState = 0;
-//                checkState();
-//                new Async_GetData().execute(carType);
-//                typeFilter.setSelection(0);
-//                break;
-//            case "Medium":
-//                pageState = 1;
-//                checkState();
-//                new Async_GetData().execute(carType);
-//                typeFilter.setSelection(0);
-//                break;
-//            case "Big":
-//                pageState = 2;
-//                checkState();
-//                new Async_GetData().execute(carType);
-//                typeFilter.setSelection(0);
-//                break;
-//            default:
-//
-//        }
-//    }
 }

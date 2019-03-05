@@ -1,7 +1,4 @@
-package osac.digiponic.com.osac.Model;
-
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+package osac.digiponic.com.osac.model;
 
 public class DataItemCheckout {
 
