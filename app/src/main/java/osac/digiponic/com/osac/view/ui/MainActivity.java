@@ -173,74 +173,73 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             }
         });
 
-        // Button Select
-        smallCar = findViewById(R.id.btn_smallCar);
-        mediumCar = findViewById(R.id.btn_mediumCar);
-        bigCar = findViewById(R.id.btn_largeCar);
+//        // Button Select
+//        smallCar = findViewById(R.id.btn_smallCar);
+//        mediumCar = findViewById(R.id.btn_mediumCar);
 
         // Set State
-        checkState();
+//        checkState();
 
-        // Set Button onClick
-        smallCar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickedType = "Small";
-                changeTypeDialog.show();
-            }
-        });
-        mediumCar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickedType = "Medium";
-                changeTypeDialog.show();
-            }
-        });
-        bigCar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickedType = "Big";
-                changeTypeDialog.show();
-            }
-        });
+//        // Set Button onClick
+//        smallCar.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                clickedType = "Small";
+//                changeTypeDialog.show();
+//            }
+//        });
+//        mediumCar.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                clickedType = "Medium";
+//                changeTypeDialog.show();
+//            }
+//        });
+//        bigCar.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                clickedType = "Big";
+//                changeTypeDialog.show();
+//            }
+//        });
 
-        // Setup Spinner
-        typeFilter = findViewById(R.id.spinner_filterType);
-        String[] serviceType = new String[]{
-                "Semua Jasa", "Car Wash", "Car Care"
-        };
-        final List<String> serviceList = new ArrayList<>(Arrays.asList(serviceType));
-        final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-                this, R.layout.spinner_item, serviceList) {
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-                TextView textView = (TextView) view;
-                textView.setTextColor(Color.BLACK);
-                return view;
-            }
-        };
-        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
-        typeFilter.setAdapter(spinnerArrayAdapter);
-        typeFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 1) {
-                    filter("Car Wash");
-                } else if (position == 2) {
-                    filter("Car Care");
-                } else if (position == 0) {
-                    filter("All");
-                }
-                if (dataFetched) {
-                    menuRVAdapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+//        // Setup Spinner
+//        typeFilter = findViewById(R.id.spinner_filterType);
+//        String[] serviceType = new String[]{
+//                "Semua Jasa", "Car Wash", "Car Care"
+//        };
+//        final List<String> serviceList = new ArrayList<>(Arrays.asList(serviceType));
+//        final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+//                this, R.layout.spinner_item, serviceList) {
+//            @Override
+//            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+//                View view = super.getDropDownView(position, convertView, parent);
+//                TextView textView = (TextView) view;
+//                textView.setTextColor(Color.BLACK);
+//                return view;
+//            }
+//        };
+//        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
+//        typeFilter.setAdapter(spinnerArrayAdapter);
+//        typeFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                if (position == 1) {
+//                    filter("Car Wash");
+//                } else if (position == 2) {
+//                    filter("Car Care");
+//                } else if (position == 0) {
+//                    filter("All");
+//                }
+//                if (dataFetched) {
+//                    menuRVAdapter.notifyDataSetChanged();
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//            }
+//        });
 
         // Get Data From API
         new Async_GetData().execute(carType);
@@ -1012,33 +1011,33 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         emptyCart.setVisibility(invoiceRVAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
     }
 
-    private void checkState() {
-        switch (pageState) {
-            case 0:
-                carType = "Kecil";
-                pageState = 0;
-                changeBtnBackgroound(smallCar);
+//    private void checkState() {
+//        switch (pageState) {
+//            case 0:
+//                carType = "Kecil";
+//                pageState = 0;
+//                changeBtnBackgroound(smallCar);
+//
+//                break;
+//            case 1:
+//                carType = "Sedang";
+//                pageState = 1;
+//                changeBtnBackgroound(mediumCar);
+//                break;
+//            case 2:
+//                carType = "Besar";
+//                pageState = 2;
+//                changeBtnBackgroound(bigCar);
+//                break;
+//        }
+//    }
 
-                break;
-            case 1:
-                carType = "Sedang";
-                pageState = 1;
-                changeBtnBackgroound(mediumCar);
-                break;
-            case 2:
-                carType = "Besar";
-                pageState = 2;
-                changeBtnBackgroound(bigCar);
-                break;
-        }
-    }
-
-    private void changeBtnBackgroound(Button button) {
-        smallCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        mediumCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        bigCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        button.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight));
-    }
+//    private void changeBtnBackgroound(Button button) {
+//        smallCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+//        mediumCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+//        bigCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+//        button.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight));
+//    }
 
     private void dataCartClear() {
         mDataCart.clear();
@@ -1097,33 +1096,33 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             public void onClick(View v) {
                 resultChange = true;
                 changeTypeDialog.dismiss();
-                changeType(clickedType);
+//                changeType(clickedType);
             }
         });
     }
 
-    private void changeType(String type) {
-        switch (type) {
-            case "Small":
-                pageState = 0;
-                checkState();
-                new Async_GetData().execute(carType);
-                typeFilter.setSelection(0);
-                break;
-            case "Medium":
-                pageState = 1;
-                checkState();
-                new Async_GetData().execute(carType);
-                typeFilter.setSelection(0);
-                break;
-            case "Big":
-                pageState = 2;
-                checkState();
-                new Async_GetData().execute(carType);
-                typeFilter.setSelection(0);
-                break;
-            default:
-
-        }
-    }
+//    private void changeType(String type) {
+//        switch (type) {
+//            case "Small":
+//                pageState = 0;
+//                checkState();
+//                new Async_GetData().execute(carType);
+//                typeFilter.setSelection(0);
+//                break;
+//            case "Medium":
+//                pageState = 1;
+//                checkState();
+//                new Async_GetData().execute(carType);
+//                typeFilter.setSelection(0);
+//                break;
+//            case "Big":
+//                pageState = 2;
+//                checkState();
+//                new Async_GetData().execute(carType);
+//                typeFilter.setSelection(0);
+//                break;
+//            default:
+//
+//        }
+//    }
 }
