@@ -92,16 +92,14 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private InvoiceRVAdapter invoiceRVAdapter;
 
     // Variable
-    public boolean dataFetched = false;
-    private int pageState = 0;
-    private String carType = "";
-    private boolean resultChange;
-    private String clickedType = "";
     byte FONT_TYPE;
     private static BluetoothSocket btsocket;
     private static OutputStream outputStream;
     int total = 0;
 
+    // Variable Global
+    private String brand;
+    private String carType;
 
     // Constraint
     public static final int CONNECTION_TIMEOUT = 10000;
@@ -118,8 +116,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Initialize View Model
         mMainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
         mMainActivityViewModel.init();
-
-
 
         // Get Data From View Model
         mMainActivityViewModel.getmMenuData().observe(this, new Observer<List<DataItemMenu>>() {
@@ -491,6 +487,16 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
     }
 
+    @Override
+    public void onCarWashItemClick(View view, int position) {
+        Toast.makeText(this, "Car Wash : " + position, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onCarCareItemClick(View view, int position) {
+        Toast.makeText(this, "Car Care : " + position, Toast.LENGTH_SHORT).show();
+    }
+
     private void setAdapterRV() {
         // Setup Menu Recyclerview
         recyclerView_Menu = findViewById(R.id.rv_recommended);
@@ -502,13 +508,13 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         recyclerView_carWash = findViewById(R.id.rv_car_wash);
         recyclerView_carWash.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         carWashRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuData().getValue());
-        carWashRVAdapter.setClickListener(this);
+        carWashRVAdapter.setCarWashIitemClickListener(this);
         recyclerView_carWash.setAdapter(carWashRVAdapter);
 
         recyclerView_carCare = findViewById(R.id.rv_car_care);
         recyclerView_carCare.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         carCareRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuData().getValue());
-        carCareRVAdapter.setClickListener(this);
+        carCareRVAdapter.setCarCareItemClickListener(this);
         recyclerView_carCare.setAdapter(carCareRVAdapter);
 
         // Setup Invoice Recyclerview
@@ -670,34 +676,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         emptyCart.setVisibility(invoiceRVAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
     }
 
-//    private void checkState() {
-//        switch (pageState) {
-//            case 0:
-//                carType = "Kecil";
-//                pageState = 0;
-//                changeBtnBackgroound(smallCar);
-//
-//                break;
-//            case 1:
-//                carType = "Sedang";
-//                pageState = 1;
-//                changeBtnBackgroound(mediumCar);
-//                break;
-//            case 2:
-//                carType = "Besar";
-//                pageState = 2;
-//                changeBtnBackgroound(bigCar);
-//                break;
-//        }
-//    }
-
-//    private void changeBtnBackgroound(Button button) {
-//        smallCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-//        mediumCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-//        bigCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-//        button.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight));
-//    }
-
     private void dataCartClear() {
         mDataCart.clear();
         for (DataItemMenu item : mDataItem) {
@@ -746,14 +724,14 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                resultChange = false;
+//                resultChange = false;
                 changeTypeDialog.dismiss();
             }
         });
         okBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                resultChange = true;
+//                resultChange = true;
                 changeTypeDialog.dismiss();
             }
         });

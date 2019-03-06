@@ -28,14 +28,15 @@
         <activity
             android:name=".print.AdminActivity"
             android:theme="@style/NoActionBar" />
-        <activity android:name=".NavigationMenu" />
         <activity
-            android:name=".SplashScreen"
+            android:name=".view.ui.SplashScreen"
             android:theme="@style/NoActionBar" />
         <activity
             android:name=".print.DeviceList"
             android:theme="@style/NoActionBar" />
-        <activity android:name=".BrandSelection"></activity>
+        <activity
+            android:name=".view.ui.BrandSelection"
+            android:theme="@style/NoActionBar"></activity>
     </application>
 
 </manifest>

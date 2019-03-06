@@ -1,4 +1,4 @@
-package osac.digiponic.com.osac;
+package osac.digiponic.com.osac.view.ui;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import osac.digiponic.com.osac.view.ui.MainActivity;
+import osac.digiponic.com.osac.R;
 
 public class SplashScreen extends AppCompatActivity {
 

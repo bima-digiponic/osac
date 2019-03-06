@@ -27,6 +27,8 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
     private List<DataItemMenu> mDataItem;
     private Context mContext;
     ItemClickListener mClickListener;
+    ItemClickListener carWashIitemClickListener;
+    ItemClickListener carCareItemClickListener;
 
     public MenuRVAdapter(Context mContext, List<DataItemMenu> mDataItem) {
         this.mDataItem = mDataItem;
@@ -109,8 +111,18 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         this.mClickListener = itemClickListener;
     }
 
+    public void setCarWashIitemClickListener(ItemClickListener itemClickListener) {
+        this.carWashIitemClickListener = itemClickListener;
+    }
+
+    public void setCarCareItemClickListener(ItemClickListener itemClickListener) {
+        this.carCareItemClickListener = itemClickListener;
+    }
+
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+        void onCarWashItemClick(View view, int position);
+        void onCarCareItemClick(View view, int position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -132,6 +144,8 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         @Override
         public void onClick(View v) {
             if (mClickListener != null) mClickListener.onItemClick(v, getAdapterPosition());
+            if (carCareItemClickListener != null) carCareItemClickListener.onCarCareItemClick(v, getAdapterPosition());
+            if (carWashIitemClickListener != null) carWashIitemClickListener.onCarWashItemClick(v, getAdapterPosition());
         }
     }
 
