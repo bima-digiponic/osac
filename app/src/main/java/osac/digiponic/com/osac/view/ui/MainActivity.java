@@ -108,10 +108,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
         // Lock Screen to Horizontal
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        setContentView(R.layout.activity_main);
+
 
         // Initialize View Model
         mMainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);

@@ -20,6 +20,7 @@ import java.util.List;
 
 import osac.digiponic.com.osac.model.DataBrand;
 import osac.digiponic.com.osac.model.DataItemMenu;
+import osac.digiponic.com.osac.model.DataVehicle;
 
 import static osac.digiponic.com.osac.view.ui.MainActivity.CONNECTION_TIMEOUT;
 import static osac.digiponic.com.osac.view.ui.MainActivity.READ_TIMEOUT;
@@ -29,6 +30,8 @@ public class BrandRepository {
     private static BrandRepository instance;
     private ArrayList<DataBrand> dataSetBrand = new ArrayList<>();
     private MutableLiveData<List<DataBrand>> dataBrand = new MutableLiveData<>();
+    private ArrayList<DataVehicle> vehicleList = new ArrayList<>();
+    private MutableLiveData<List<DataVehicle>> dataVehicle = new MutableLiveData<>();
 
 
     public static BrandRepository getInstance() {
@@ -38,10 +41,16 @@ public class BrandRepository {
         return instance;
     }
 
+    public MutableLiveData<List<DataVehicle>> getDataVehicle(String brandID) {
+        new Async_GetDataVehicle().execute(brandID);
+        dataVehicle.setValue(vehicleList);
+        return dataVehicle;
+    }
+
     public MutableLiveData<List<DataBrand>> getDataBrand() {
         new Async_GetDataBrand().execute();
-//        dataSetBrand.add(new DataBrand())
         dataBrand.setValue(dataSetBrand);
+        Log.d("datasetbrand", dataSetBrand.toString());
         return dataBrand;
     }
 
@@ -51,15 +60,16 @@ public class BrandRepository {
         HttpURLConnection conn;
         URL url = null;
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-        }
+//        @Override
+//        protected void onPreExecute() {
+////            dataSetBrand.clear();
+//            super.onPreExecute();
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void aVoid) {
+//            super.onPostExecute(aVoid);
+//        }
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -108,7 +118,9 @@ public class BrandRepository {
                     int jLoop = 0;
                     while (jLoop < jsonArray.length()) {
                         jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
-                        dataSetBrand.add(new DataBrand(0, jsonObject.getString("keterangan"), null));
+                        dataSetBrand.add(new DataBrand(jsonObject.getString("id"), jsonObject.getString("kode_tipe"),
+                                jsonObject.getString("keterangan"), jsonObject.getString("gambar")));
+                        Log.d("datasetdebugbrand", dataSetBrand.get(jLoop).toString());
                         jLoop += 1;
                     }
                 } else {
@@ -120,6 +132,86 @@ public class BrandRepository {
             } finally {
                 conn.disconnect();
             }
+            return null;
+        }
+    }
+
+    private class Async_GetDataVehicle extends AsyncTask<String, String, String> {
+
+        // Variable
+        HttpURLConnection conn;
+        URL url = null;
+
+        @Override
+        protected void onPreExecute() {
+            vehicleList.clear();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            String brandID = strings[0];
+
+            try {
+                url = new URL("http://app.digiponic.co.id/osac/apiosac/api/merek?id_merek=" + brandID);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(READ_TIMEOUT);
+                conn.setConnectTimeout(CONNECTION_TIMEOUT);
+                conn.setRequestMethod("GET");
+                conn.connect();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                int response_code = conn.getResponseCode();
+
+                if (response_code == HttpURLConnection.HTTP_OK) {
+                    //Read data sent from server
+                    Log.d("ResponseCode", String.valueOf(response_code));
+                    InputStream input = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    StringBuilder result = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
+                    String resultFromServer = "";
+                    JSONObject jsonObject = null;
+                    JSONArray jsonArray = null;
+                    try {
+                        jsonArray = new JSONArray(result.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    int jLoop = 0;
+                    while (jLoop < jsonArray.length()) {
+                        jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
+                        vehicleList.add(new DataVehicle(jsonObject.getString("id"), jsonObject.getString("kode_general"),
+                                jsonObject.getString("kode"), jsonObject.getString("jenis_kendaraan"), jsonObject.getString("keterangan")));
+                        jLoop += 1;
+                    }
+                } else {
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                conn.disconnect();
+            }
+
             return null;
         }
     }

@@ -72,7 +72,7 @@ public class MenuRepository {
             // Background process, Fetching data from API
             String carType = params[0];
             try {
-                url = new URL("http://app.digiponic.co.id/osac/apiosac/api/jasa?kategori=28&jenis_kendaraan=25");
+                url = new URL("http://app.digiponic.co.id/osac/apiosac/api/jasa");
                 Log.d("ConenctionTest", "connected url : " + url.toString());
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -117,10 +117,10 @@ public class MenuRepository {
                     int jLoop = 0;
                     while (jLoop < jsonArray.length()) {
                         jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
-                        dataSet.add(new DataItemMenu(jsonObject.getString("id"),
-                                jsonObject.getString("name"), jsonObject.getString("price"),
-                                jsonObject.getString("jenis_kendaraan"), jsonObject.getString("kategori"),
-                                jsonObject.getString("images")));
+                        dataSet.add(new DataItemMenu(jsonObject.getString("id"), jsonObject.getString("name"),
+                                jsonObject.getString("price"), jsonObject.getString("jenis_kendaraan_keterangan"),
+                                jsonObject.getString("jenis_kendaraan"), jsonObject.getString("kategori_keterangan"),
+                                jsonObject.getString("kategori"), jsonObject.getString("gambar")));
                         jLoop += 1;
                         Log.d("DataSetTestDebug", dataSet.toString());
                     }

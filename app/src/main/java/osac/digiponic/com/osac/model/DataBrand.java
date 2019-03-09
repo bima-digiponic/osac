@@ -2,21 +2,29 @@ package osac.digiponic.com.osac.model;
 
 public class DataBrand {
 
-    private int id;
-    private String name, image;
+    private String id, kode_tipe, name, image;
 
-    public DataBrand(int id, String name, String image) {
+    public DataBrand(String id, String kode_tipe, String name, String image) {
         this.id = id;
+        this.kode_tipe = kode_tipe;
         this.name = name;
         this.image = image;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
+    }
+
+    public String getKode_tipe() {
+        return kode_tipe;
+    }
+
+    public void setKode_tipe(String kode_tipe) {
+        this.kode_tipe = kode_tipe;
     }
 
     public String getName() {

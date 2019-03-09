@@ -17,9 +17,15 @@ public class DataItemMenu {
     @SerializedName("_itemVehicleType")
     @Expose
     private String _itemVehicleType;
+    @SerializedName("_itemVehicleTypeID")
+    @Expose
+    private String _itemVehicleTypeID;
     @SerializedName("_itemType")
     @Expose
     private String _itemType;
+    @SerializedName("_itemTypeID")
+    @Expose
+    private String _itemTypeID;
     @SerializedName("_itemImage")
     @Expose
     private String _itemImage;
@@ -33,14 +39,6 @@ public class DataItemMenu {
         this.selected = selected;
     }
 
-    public DataItemMenu() {
-    }
-
-    public DataItemMenu(String _itemName, String _itemPrice) {
-        this._itemName = _itemName;
-        this._itemPrice = _itemPrice;
-    }
-
     public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemType, String _itemImage) {
         this._itemID = _itemID;
         this._itemName = _itemName;
@@ -50,22 +48,14 @@ public class DataItemMenu {
         this._itemImage = _itemImage;
     }
 
-    public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemType, boolean selected) {
+    public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemVehicleTypeID, String _itemType, String _itemTypeID, String _itemImage) {
         this._itemID = _itemID;
         this._itemName = _itemName;
         this._itemPrice = _itemPrice;
         this._itemVehicleType = _itemVehicleType;
+        this._itemVehicleTypeID = _itemVehicleTypeID;
         this._itemType = _itemType;
-        this.selected = selected;
-    }
-
-    public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemType, boolean selected, String _itemImage) {
-        this._itemID = _itemID;
-        this._itemName = _itemName;
-        this._itemPrice = _itemPrice;
-        this._itemVehicleType = _itemVehicleType;
-        this._itemType = _itemType;
-        this.selected = selected;
+        this._itemTypeID = _itemTypeID;
         this._itemImage = _itemImage;
     }
 

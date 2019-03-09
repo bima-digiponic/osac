@@ -17,7 +17,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".view.ui.MainActivity"
+            android:name=".view.ui.BrandSelection"
             android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,7 +35,7 @@
             android:name=".print.DeviceList"
             android:theme="@style/NoActionBar" />
         <activity
-            android:name=".view.ui.BrandSelection"
+            android:name=".view.ui.MainActivity"
             android:theme="@style/NoActionBar"></activity>
     </application>
 
