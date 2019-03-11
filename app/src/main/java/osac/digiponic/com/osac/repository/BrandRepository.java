@@ -49,6 +49,9 @@ public class BrandRepository {
 
     public MutableLiveData<List<DataBrand>> getDataBrand() {
         new Async_GetDataBrand().execute();
+//        dataSetBrand.add(new DataBrand("1", "2", "a", "http://app.digiponic.co.id/osac/public/uploads/2019-03/toyota.png"));
+//        dataSetBrand.add(new DataBrand("1", "2", "a", "http://app.digiponic.co.id/osac/public/uploads/2019-03/toyota.png"));
+//        dataSetBrand.add(new DataBrand("1", "2", "a", "http://app.digiponic.co.id/osac/public/uploads/2019-03/toyota.png"));
         dataBrand.setValue(dataSetBrand);
         Log.d("datasetbrand", dataSetBrand.toString());
         return dataBrand;
@@ -59,17 +62,6 @@ public class BrandRepository {
         // Variable
         HttpURLConnection conn;
         URL url = null;
-
-//        @Override
-//        protected void onPreExecute() {
-////            dataSetBrand.clear();
-//            super.onPreExecute();
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Void aVoid) {
-//            super.onPostExecute(aVoid);
-//        }
 
         @Override
         protected Void doInBackground(Void... voids) {
