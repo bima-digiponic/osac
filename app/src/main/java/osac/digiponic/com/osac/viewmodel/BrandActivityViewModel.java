@@ -19,17 +19,24 @@ public class BrandActivityViewModel extends ViewModel {
     private MutableLiveData<List<DataVehicle>> mVehiclelData;
 
     public void init() {
-//        if (mBrandData != null) {
-//            return;
-//        }
+        if (mBrandData != null) {
+            return;
+        }
+
         brandRepository = BrandRepository.getInstance();
+        brandRepository.initRetrofit();
         mBrandData = brandRepository.getDataBrand();
-        Log.d("brandData", mBrandData.getValue().toString());
         mVehiclelData = brandRepository.getDataVehicle("");
     }
 
     public LiveData<List<DataBrand>> getBrandData() {
         return mBrandData;
+    }
+
+    public void addNewData(DataBrand dataBrand) {
+        List<DataBrand> currentData = mBrandData.getValue();
+        currentData.add(dataBrand);
+        mBrandData.postValue(currentData);
     }
 
     public LiveData<List<DataVehicle>> getVehicleData(String brandID) {

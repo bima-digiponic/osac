@@ -14,4 +14,12 @@
         android:layout_height="match_parent">
     </android.support.v7.widget.RecyclerView>
 
+    <Button
+        android:id="@+id/add_debug_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:text="Add"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 </android.support.constraint.ConstraintLayout>

@@ -40,15 +40,13 @@ public class BrandRVAdapter extends RecyclerView.Adapter<BrandRVAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         DataBrand data = mDataBrand.get(i);
 //        viewHolder._brandImage.setImageDrawable(mContext.getResources().getDrawable(R.drawable.logo));
-        Picasso.get().load(data.getImage()).into(viewHolder._brandImage);
+        Picasso.get().load(data.getGambar()).into(viewHolder._brandImage);
     }
 
     @Override
     public int getItemCount() {
         return mDataBrand.size();
     }
-
-
 
     public void setClickListener(ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;

@@ -19,6 +19,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -62,12 +63,29 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         // Lock Screen to Horizontal
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
+        Button debugBtn = findViewById(R.id.add_debug_btn);
+        debugBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                brandActivityViewModel.addNewData(new DataBrand("1", "2", "a", "http://app.digiponic.co.id/osac/public/uploads/2019-03/toyota.png", "toyota"));
+            }
+        });
         fragmentManager = getSupportFragmentManager();
         vehicleListDialog = new VehicleListDialog();
 
         brandActivityViewModel = ViewModelProviders.of(this).get(BrandActivityViewModel.class);
         brandActivityViewModel.init();
 
+        brandActivityViewModel.getBrandData().observe(this, dataBrands -> {
+            brandRVAdapter.notifyDataSetChanged();
+            Log.d("isidebugdata", String.valueOf(brandRVAdapter.getItemCount()));
+            Toast.makeText(BrandSelection.this, "onChanged", Toast.LENGTH_SHORT).show();
+        });
+
+        setRV();
+    }
+
+    private void setRV() {
         recyclerView_Brand = findViewById(R.id.rv_brands);
         recyclerView_Brand.setLayoutManager(new GridLayoutManager(this, 4));
         recyclerView_Brand.setHasFixedSize(true);
@@ -77,11 +95,6 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         recyclerView_Brand.setAdapter(brandRVAdapter);
         brandRVAdapter.notifyDataSetChanged();
         Log.d("datasize", String.valueOf(brandRVAdapter.getItemCount()));
-
-        brandActivityViewModel.getBrandData().observe(this, dataBrands -> {
-            brandRVAdapter.notifyDataSetChanged();
-            Toast.makeText(BrandSelection.this, "onChanged", Toast.LENGTH_SHORT).show();
-        });
     }
 
     @Override
