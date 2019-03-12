@@ -52,6 +52,10 @@ public class BrandRVAdapter extends RecyclerView.Adapter<BrandRVAdapter.ViewHold
         this.mClickListener = itemClickListener;
     }
 
+    public int getVehicleId(int position) {
+        return Integer.parseInt(mDataBrand.get(position).getId());
+    }
+
     public interface ItemClickListener {
         void onItemClick(View view, int position);
     }

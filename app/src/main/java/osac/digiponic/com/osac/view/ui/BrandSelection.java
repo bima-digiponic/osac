@@ -1,24 +1,18 @@
 package osac.digiponic.com.osac.view.ui;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -27,7 +21,6 @@ import java.util.List;
 
 import osac.digiponic.com.osac.R;
 import osac.digiponic.com.osac.model.DataBrand;
-import osac.digiponic.com.osac.model.VehicleListDialog;
 import osac.digiponic.com.osac.view.adapter.BrandRVAdapter;
 import osac.digiponic.com.osac.view.adapter.VehicleRVAdapter;
 import osac.digiponic.com.osac.viewmodel.BrandActivityViewModel;
@@ -64,11 +57,10 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         Button debugBtn = findViewById(R.id.add_debug_btn);
-        debugBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                brandActivityViewModel.addNewData(new DataBrand("1", "2", "a", "http://app.digiponic.co.id/osac/public/uploads/2019-03/toyota.png", "toyota"));
-            }
+        debugBtn.setOnClickListener(v -> {
+            brandRVAdapter.notifyDataSetChanged();
+            brandRVAdapter.notifyItemInserted(brandActivityViewModel.getBrandData().getValue().size());
+
         });
         fragmentManager = getSupportFragmentManager();
         vehicleListDialog = new VehicleListDialog();
@@ -83,6 +75,9 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         });
 
         setRV();
+
+
+
     }
 
     private void setRV() {
@@ -92,15 +87,18 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         brandRVAdapter = new BrandRVAdapter(this, brandActivityViewModel.getBrandData().getValue());
         Log.d("brandvalue", brandActivityViewModel.getBrandData().getValue().toString());
         brandRVAdapter.setClickListener(this);
-        recyclerView_Brand.setAdapter(brandRVAdapter);
-        brandRVAdapter.notifyDataSetChanged();
+        new Handler().postDelayed(() -> {
+            recyclerView_Brand.setAdapter(brandRVAdapter);
+            brandRVAdapter.notifyDataSetChanged();
+        }, 3000);
+
         Log.d("datasize", String.valueOf(brandRVAdapter.getItemCount()));
     }
 
     @Override
     public void onItemClick(View view, int position) {
 
-        BrandID = "30";
+        BrandID = String.valueOf(brandRVAdapter.getVehicleId(position));
         vehicleListDialog.show(fragmentManager, "Daftar Kendaraan");
     }
 

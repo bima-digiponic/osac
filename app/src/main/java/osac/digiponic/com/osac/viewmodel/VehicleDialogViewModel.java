@@ -3,33 +3,29 @@ package osac.digiponic.com.osac.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
-import android.util.Log;
 
 import java.util.List;
 
-import osac.digiponic.com.osac.model.DataBrand;
 import osac.digiponic.com.osac.model.DataVehicle;
 import osac.digiponic.com.osac.repository.BrandRepository;
-import osac.digiponic.com.osac.view.ui.BrandSelection;
 
-public class BrandActivityViewModel extends ViewModel {
+public class VehicleDialogViewModel extends ViewModel {
 
-    private MutableLiveData<List<DataBrand>> mBrandData;
-    private BrandRepository brandRepository;
     private MutableLiveData<List<DataVehicle>> mVehicleData;
+    private BrandRepository brandRepository;
 
-    public void init() {
-        if (mBrandData != null) {
+    public void init(String brandID) {
+        if (mVehicleData != null) {
             return;
         }
 
         brandRepository = BrandRepository.getInstance();
         brandRepository.initRetrofit();
-        mBrandData = brandRepository.getDataBrand();
+        mVehicleData = brandRepository.getDataVehicle(brandID);
     }
 
-    public LiveData<List<DataBrand>> getBrandData() {
-        return mBrandData;
+    public LiveData<List<DataVehicle>> getVehicleData() {
+        return mVehicleData;
     }
 
 }

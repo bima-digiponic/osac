@@ -112,35 +112,23 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.activity_main);
 
-
         // Initialize View Model
         mMainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
         mMainActivityViewModel.init();
 
         // Get Data From View Model
-        mMainActivityViewModel.getmMenuData().observe(this, new Observer<List<DataItemMenu>>() {
-            @Override
-            public void onChanged(@Nullable List<DataItemMenu> dataItemMenus) {
-                // Notify Adapter
-                menuRVAdapter.notifyDataSetChanged();
-            }
+        mMainActivityViewModel.getmMenuData().observe(this, dataItemMenus -> {
+            // Notify Adapter
+            menuRVAdapter.notifyDataSetChanged();
         });
 
-        mMainActivityViewModel.getmServiceData().observe(this, new Observer<List<DataServiceType>>() {
-            @Override
-            public void onChanged(@Nullable List<DataServiceType> dataServiceTypes) {
-
-            }
+        mMainActivityViewModel.getmServiceData().observe(this, dataServiceTypes -> {
         });
 
-        mMainActivityViewModel.getmVehicleData().observe(this, new Observer<List<DataVehicleType>>() {
-            @Override
-            public void onChanged(@Nullable List<DataVehicleType> dataVehicleTypes) {
-
-            }
+        mMainActivityViewModel.getmVehicleData().observe(this, dataVehicleTypes -> {
         });
 
-        //
+        // set Adapter
         setAdapterRV();
 
         // Initialize TextView Total
@@ -171,36 +159,30 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
         // Setup Hidden Function
         hidden_tv = findViewById(R.id.textView_invoice);
-        hidden_tv.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Toast.makeText(MainActivity.this, "Setup Page", Toast.LENGTH_SHORT).show();
-                toSetting();
-                return false;
-            }
+        hidden_tv.setOnLongClickListener(v -> {
+            Toast.makeText(MainActivity.this, "Setup Page", Toast.LENGTH_SHORT).show();
+            toSetting();
+            return false;
         });
 
         // Set Checkout Button
         checkOutBtn = findViewById(R.id.btn_checkout);
-        checkOutBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                blackLayout.setVisibility(View.VISIBLE);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        blackLayout.setVisibility(View.GONE);
-                        if (mDataCart.size() == 0) {
-                            incompleteDialog.show();
-                        } else {
-                            new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/api/public/transaction");
-                            total_tv.setText("Rp. 0");
-                        }
-
-                        Log.d("datacartsize", String.valueOf(mDataCart.size()));
+        checkOutBtn.setOnClickListener(v -> {
+            blackLayout.setVisibility(View.VISIBLE);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    blackLayout.setVisibility(View.GONE);
+                    if (mDataCart.size() == 0) {
+                        incompleteDialog.show();
+                    } else {
+                        new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/api/public/transaction");
+                        total_tv.setText("Rp. 0");
                     }
-                }, 3000);
-            }
+
+                    Log.d("datacartsize", String.valueOf(mDataCart.size()));
+                }
+            }, 3000);
         });
     }
 
@@ -692,12 +674,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         completeDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
         Button okBtn = completeDialog.findViewById(R.id.dialog_ok_btn);
-        okBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                completeDialog.dismiss();
-            }
-        });
+        okBtn.setOnClickListener(v -> completeDialog.dismiss());
     }
 
     private void setupUnCompleteDialog() {
@@ -706,12 +683,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         incompleteDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
         Button okBtn = incompleteDialog.findViewById(R.id.dialog_ok_btn_undone);
-        okBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                incompleteDialog.dismiss();
-            }
-        });
+        okBtn.setOnClickListener(v -> incompleteDialog.dismiss());
     }
 
     private void setupChangeTypeDialog() {
@@ -721,19 +693,11 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
         Button cancelBtn = changeTypeDialog.findViewById(R.id.dialog_cancel_btn_change);
         Button okBtn = changeTypeDialog.findViewById(R.id.dialog_ok_btn_change);
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                resultChange = false;
-                changeTypeDialog.dismiss();
-            }
+        cancelBtn.setOnClickListener(v -> {
+            changeTypeDialog.dismiss();
         });
-        okBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                resultChange = true;
-                changeTypeDialog.dismiss();
-            }
+        okBtn.setOnClickListener(v -> {
+            changeTypeDialog.dismiss();
         });
     }
 }

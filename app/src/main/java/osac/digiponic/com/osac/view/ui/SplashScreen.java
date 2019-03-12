@@ -18,13 +18,10 @@ public class SplashScreen extends AppCompatActivity {
         // Lock Screen to Horizontal
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
+        new Handler().postDelayed(() -> {
 
-                startActivity(new Intent(SplashScreen.this,MainActivity.class));
-                finish();
-            }
+            startActivity(new Intent(SplashScreen.this,MainActivity.class));
+            finish();
         },2000);
     }
 }
