@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -26,6 +27,8 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
     private List<DataItemMenu> mDataItem;
     private Context mContext;
     ItemClickListener mClickListener;
+    ItemClickListener carWashIitemClickListener;
+    ItemClickListener carCareItemClickListener;
 
     public MenuRVAdapter(Context mContext, List<DataItemMenu> mDataItem) {
         this.mDataItem = mDataItem;
@@ -43,58 +46,48 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
         DataItemMenu data = mDataItem.get(i);
-        viewHolder._itemName.setText(data.get_itemName());
+        viewHolder._itemName.setText(data.getName());
         Locale localeID = new Locale("in", "ID");
         NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
-        viewHolder._itemPrice.setText(formatRupiah.format((double)data.get_itemPrice()));
+        viewHolder._itemPrice.setText(formatRupiah.format(Double.parseDouble(data.getPrice())));
         viewHolder._itemName.setSelected(true);
         viewHolder._itemPrice.setSelected(true);
-        if (i == 2) {
-            viewHolder._itemName.setText("Single line that makes TextView scroll if too long");
-        }
         if (isSelected(i)) {
             viewHolder._deleteLayout.setVisibility(View.VISIBLE);
         } else {
             viewHolder._deleteLayout.setVisibility(View.GONE);
         }
-//        Log.d("urlimageimage", data.get_itemImage());
-        Picasso.get().load(data.get_itemImage()).into(viewHolder._itemImage);
+        Picasso.get().load(data.getGambar()).into(viewHolder._itemImage);
         Log.d("ImagesimagesDEBUg", String.valueOf(viewHolder._itemImage));
 
     }
 
     @Override
     public int getItemCount() {
-        return mDataItem.size();
+        if (mDataItem != null) {
+            return mDataItem.size();
+        }
+        return 0;
     }
 
     public String getItemID(int id) {
-        return String.valueOf(mDataItem.get(id).get_itemID());
+        return String.valueOf(mDataItem.get(id).getId());
     }
 
     public String getItemName(int id) {
-        return String.valueOf(mDataItem.get(id).get_itemName());
+        return String.valueOf(mDataItem.get(id).getName());
     }
 
     public String getItemPrice(int id) {
-        return String.valueOf(mDataItem.get(id).get_itemPrice());
-    }
-
-    public String getItemVehicleType(int id) {
-        return String.valueOf(mDataItem.get(id).get_itemVehicleType());
-    }
-
-    public String getItemType(int id) {
-        return String.valueOf(mDataItem.get(id).get_itemType());
-    }
-
-    public String getItemImage(int id) {
-        return String.valueOf(mDataItem.get(id).get_itemImage());
-
+        return String.valueOf(mDataItem.get(id).getPrice());
     }
 
     public void setSelected(int id, boolean input) {
         mDataItem.get(id).setSelected(input);
+    }
+
+    public DataItemMenu getDataMenu(int position) {
+        return mDataItem.get(position);
     }
 
     public boolean isSelected(int id) {
@@ -105,8 +98,18 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         this.mClickListener = itemClickListener;
     }
 
+    public void setCarWashIitemClickListener(ItemClickListener itemClickListener) {
+        this.carWashIitemClickListener = itemClickListener;
+    }
+
+    public void setCarCareItemClickListener(ItemClickListener itemClickListener) {
+        this.carCareItemClickListener = itemClickListener;
+    }
+
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+        void onCarWashItemClick(View view, int position);
+        void onCarCareItemClick(View view, int position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -114,6 +117,7 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         public TextView _itemName, _itemPrice;
         public LinearLayout _deleteLayout;
         public ImageView _itemImage;
+
         public ViewHolder(View v) {
             super(v);
             v.setOnClickListener(this);
@@ -127,12 +131,10 @@ public class MenuRVAdapter extends RecyclerView.Adapter<MenuRVAdapter.ViewHolder
         @Override
         public void onClick(View v) {
             if (mClickListener != null) mClickListener.onItemClick(v, getAdapterPosition());
-
-
-
+            if (carCareItemClickListener != null) carCareItemClickListener.onCarCareItemClick(v, getAdapterPosition());
+            if (carWashIitemClickListener != null) carWashIitemClickListener.onCarWashItemClick(v, getAdapterPosition());
         }
     }
-
 
 
 }

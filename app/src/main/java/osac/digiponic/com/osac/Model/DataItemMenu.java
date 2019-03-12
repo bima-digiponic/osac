@@ -5,24 +5,36 @@ import com.google.gson.annotations.SerializedName;
 
 public class DataItemMenu {
 
-    @SerializedName("_itemID")
+    @SerializedName("id")
     @Expose
-    private String _itemID;
-    @SerializedName("_itemName")
+    private String id;
+    @SerializedName("kategori")
     @Expose
-    private String _itemName;
-    @SerializedName("_itemPrice")
+    private String kategori;
+    @SerializedName("name")
     @Expose
-    private String _itemPrice;
-    @SerializedName("_itemVehicleType")
+    private String name;
+    @SerializedName("price")
     @Expose
-    private String _itemVehicleType;
-    @SerializedName("_itemType")
+    private String price;
+    @SerializedName("jenis_kendaraan")
     @Expose
-    private String _itemType;
-    @SerializedName("_itemImage")
+    private String jenis_kendaraan;
+    @SerializedName("gambar")
     @Expose
-    private String _itemImage;
+    private String gambar;
+    @SerializedName("keterangan")
+    @Expose
+    private String keterangan;
+    @SerializedName("deskripsi")
+    @Expose
+    private String deskripsi;
+    @SerializedName("kategori_keterangan")
+    @Expose
+    private String kategori_keterangan;
+    @SerializedName("jenis_kendaraan_keterangan")
+    @Expose
+    private String jenis_kendaraan_keterangan;
     private boolean selected = false;
 
     public boolean isSelected() {
@@ -36,84 +48,96 @@ public class DataItemMenu {
     public DataItemMenu() {
     }
 
-    public DataItemMenu(String _itemName, String _itemPrice) {
-        this._itemName = _itemName;
-        this._itemPrice = _itemPrice;
+    public DataItemMenu(String id, String kategori, String name, String price, String jenis_kendaraan, String gambar, String keterangan, String deskripsi, String kategori_keterangan, String jenis_kendaraan_keterangan) {
+        this.id = id;
+        this.kategori = kategori;
+        this.name = name;
+        this.price = price;
+        this.jenis_kendaraan = jenis_kendaraan;
+        this.gambar = gambar;
+        this.keterangan = keterangan;
+        this.deskripsi = deskripsi;
+        this.kategori_keterangan = kategori_keterangan;
+        this.jenis_kendaraan_keterangan = jenis_kendaraan_keterangan;
     }
 
-    public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemType, String _itemImage) {
-        this._itemID = _itemID;
-        this._itemName = _itemName;
-        this._itemPrice = _itemPrice;
-        this._itemVehicleType = _itemVehicleType;
-        this._itemType = _itemType;
-        this._itemImage = _itemImage;
+    public String getId() {
+        return id;
     }
 
-    public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemType, boolean selected) {
-        this._itemID = _itemID;
-        this._itemName = _itemName;
-        this._itemPrice = _itemPrice;
-        this._itemVehicleType = _itemVehicleType;
-        this._itemType = _itemType;
-        this.selected = selected;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public DataItemMenu(String _itemID, String _itemName, String _itemPrice, String _itemVehicleType, String _itemType, boolean selected, String _itemImage) {
-        this._itemID = _itemID;
-        this._itemName = _itemName;
-        this._itemPrice = _itemPrice;
-        this._itemVehicleType = _itemVehicleType;
-        this._itemType = _itemType;
-        this.selected = selected;
-        this._itemImage = _itemImage;
+    public String getKategori() {
+        return kategori;
     }
 
-    public String get_itemName() {
-        return _itemName;
+    public void setKategori(String kategori) {
+        this.kategori = kategori;
     }
 
-    public void set_itemName(String _itemName) {
-        this._itemName = _itemName;
+    public String getName() {
+        return name;
     }
 
-    public int get_itemPrice() {
-        return Integer.parseInt(_itemPrice);
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void set_itemPrice(String _itemPrice) {
-        this._itemPrice = _itemPrice;
+    public String getPrice() {
+        return price;
     }
 
-    public String get_itemID() {
-        return _itemID;
+    public void setPrice(String price) {
+        this.price = price;
     }
 
-    public void set_itemID(String _itemID) {
-        this._itemID = _itemID;
+    public String getJenis_kendaraan() {
+        return jenis_kendaraan;
     }
 
-    public String get_itemVehicleType() {
-        return _itemVehicleType;
+    public void setJenis_kendaraan(String jenis_kendaraan) {
+        this.jenis_kendaraan = jenis_kendaraan;
     }
 
-    public void set_itemVehicleType(String _itemVehicleType) {
-        this._itemVehicleType = _itemVehicleType;
+    public String getGambar() {
+        return gambar;
     }
 
-    public String get_itemType() {
-        return _itemType;
+    public void setGambar(String gambar) {
+        this.gambar = gambar;
     }
 
-    public void set_itemType(String _itemType) {
-        this._itemType = _itemType;
+    public String getKeterangan() {
+        return keterangan;
     }
 
-    public String get_itemImage() {
-        return _itemImage;
+    public void setKeterangan(String keterangan) {
+        this.keterangan = keterangan;
     }
 
-    public void set_itemImage(String _itemImage) {
-        this._itemImage = _itemImage;
+    public String getDeskripsi() {
+        return deskripsi;
+    }
+
+    public void setDeskripsi(String deskripsi) {
+        this.deskripsi = deskripsi;
+    }
+
+    public String getKategori_keterangan() {
+        return kategori_keterangan;
+    }
+
+    public void setKategori_keterangan(String kategori_keterangan) {
+        this.kategori_keterangan = kategori_keterangan;
+    }
+
+    public String getJenis_kendaraan_keterangan() {
+        return jenis_kendaraan_keterangan;
+    }
+
+    public void setJenis_kendaraan_keterangan(String jenis_kendaraan_keterangan) {
+        this.jenis_kendaraan_keterangan = jenis_kendaraan_keterangan;
     }
 }

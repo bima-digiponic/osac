@@ -64,6 +64,12 @@ import osac.digiponic.com.osac.Model.DataVehicleType;
 import osac.digiponic.com.osac.Print.DeviceList;
 import osac.digiponic.com.osac.Print.PrinterCommands;
 import osac.digiponic.com.osac.Print.Utils;
+import osac.digiponic.com.osac.Rest.ApiClient;
+import osac.digiponic.com.osac.Rest.ApiInterface;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener {
 
@@ -76,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private List<DataServiceType> mDataServiceType = new ArrayList<>();
 
     // Content
-    private RecyclerView recyclerView_Menu, recyclerView_Invoice;
+    private RecyclerView recyclerView_Menu, recyclerView_carWash, recyclerView_carCare, recyclerView_Invoice;
     private ImageView emptyCart;
     private Spinner typeFilter;
     private TextView total_tv, date_tv, hidden_tv;
@@ -87,23 +93,27 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     // Adapter
     private MenuRVAdapter menuRVAdapter;
+    private MenuRVAdapter carWashRVAdapter;
+    private MenuRVAdapter carCareRVAdapter;
     private InvoiceRVAdapter invoiceRVAdapter;
 
     // Variable
-    public boolean dataFetched = false;
-    private int pageState = 0;
-    private String carType = "";
-    private boolean resultChange;
-    private String clickedType = "";
     byte FONT_TYPE;
     private static BluetoothSocket btsocket;
     private static OutputStream outputStream;
     int total = 0;
 
+    // Variable Global
+    private String brand;
+    private String carType;
 
     // Constraint
     public static final int CONNECTION_TIMEOUT = 10000;
     public static final int READ_TIMEOUT = 15000;
+
+    // Retrofit
+    private Retrofit retrofit;
+    private ApiInterface apiInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +126,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Initialize TextView Total
         total_tv = findViewById(R.id.total_textview_main);
         total_tv.setText("Rp. 0");
+
+        // Init Retrofit
+        retrofit = ApiClient.getClient();
+        apiInterface = retrofit.create(ApiInterface.class);
 
         // Initialize TextView Date
         date_tv = findViewById(R.id.date);
@@ -163,82 +177,13 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                         if (mDataCart.size() == 0) {
                             incompleteDialog.show();
                         } else {
-                            new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/api/public/transaction");
+//                            new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/api/public/transaction");
                             total_tv.setText("Rp. 0");
                         }
 
                         Log.d("datacartsize", String.valueOf(mDataCart.size()));
                     }
                 }, 3000);
-            }
-        });
-
-        // Button Select
-        smallCar = findViewById(R.id.btn_smallCar);
-        mediumCar = findViewById(R.id.btn_mediumCar);
-        bigCar = findViewById(R.id.btn_largeCar);
-
-        // Set State
-        checkState();
-
-        // Set Button onClick
-        smallCar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickedType = "Small";
-                changeTypeDialog.show();
-            }
-        });
-        mediumCar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickedType = "Medium";
-                changeTypeDialog.show();
-            }
-        });
-        bigCar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickedType = "Big";
-                changeTypeDialog.show();
-            }
-        });
-
-        // Setup Spinner
-        typeFilter = findViewById(R.id.spinner_filterType);
-        String[] serviceType = new String[]{
-                "Semua Jasa", "Car Wash", "Car Care"
-        };
-        final List<String> serviceList = new ArrayList<>(Arrays.asList(serviceType));
-        final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-                this, R.layout.spinner_item, serviceList) {
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-                TextView textView = (TextView) view;
-                textView.setTextColor(Color.BLACK);
-                return view;
-            }
-        };
-        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
-        typeFilter.setAdapter(spinnerArrayAdapter);
-        typeFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 1) {
-                    filter("Car Wash");
-                } else if (position == 2) {
-                    filter("Car Care");
-                } else if (position == 0) {
-                    filter("All");
-                }
-                if (dataFetched) {
-                    menuRVAdapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
             }
         });
 
@@ -503,15 +448,13 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
         total = 0;
         if (!menuRVAdapter.isSelected(position)) {
-            mDataCart.add(new DataItemMenu(menuRVAdapter.getItemID(position), menuRVAdapter.getItemName(position),
-                    menuRVAdapter.getItemPrice(position), menuRVAdapter.getItemVehicleType(position),
-                    menuRVAdapter.getItemType(position), menuRVAdapter.getItemImage(position)));
+            mDataCart.add(menuRVAdapter.getDataMenu(position));
             invoiceRVAdapter.notifyDataSetChanged();
             menuRVAdapter.setSelected(position, true);
             menuRVAdapter.notifyDataSetChanged();
         } else {
             for (int i = 0; i < mDataCart.size(); i++) {
-                if (mDataCart.get(i).get_itemName().equalsIgnoreCase(menuRVAdapter.getItemName(position))) {
+                if (mDataCart.get(i).getName().equalsIgnoreCase(menuRVAdapter.getItemName(position))) {
                     invoiceRVAdapter.removeAt(i);
                     invoiceRVAdapter.notifyItemRemoved(i);
                     menuRVAdapter.setSelected(position, false);
@@ -523,45 +466,42 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         Log.d("datacartsizeadd", String.valueOf(mDataCart.size()));
 
         for (DataItemMenu item : mDataCart) {
-            total += item.get_itemPrice();
+            total += Integer.parseInt(item.getPrice());
         }
         if (total > 0) {
             total_tv.setText(formatRupiah.format((double) total));
         }
     }
 
+    @Override
+    public void onCarWashItemClick(View view, int position) {
+        Toast.makeText(this, "Car Wash : " + position, Toast.LENGTH_SHORT).show();
+    }
 
-    private void filter(String type) {
-        for (DataItemMenu item : mDataItem) {
-            if (item.get_itemType().equals("Car Wash")) {
-                dataCarWash.add(new DataItemMenu(item.get_itemID(), item.get_itemName(), String.valueOf(item.get_itemPrice()), item.get_itemVehicleType(), item.get_itemType(), item.isSelected(), item.get_itemImage()));
-            } else {
-                dataCarCare.add(new DataItemMenu(item.get_itemID(), item.get_itemName(), String.valueOf(item.get_itemPrice()), item.get_itemVehicleType(), item.get_itemType(), item.isSelected(), item.get_itemImage()));
-            }
-        }
-        mDataItem.clear();
-        if (type.equals("Car Wash")) {
-            mDataItem.addAll(dataCarWash);
-            dataCarWash.clear();
-        } else if (type.equals("Car Care")) {
-            mDataItem.addAll(dataCarCare);
-            dataCarCare.clear();
-        } else {
-            mDataItem.addAll(dataCarCare);
-            mDataItem.addAll(dataCarWash);
-            dataCarCare.clear();
-            dataCarWash.clear();
-        }
+    @Override
+    public void onCarCareItemClick(View view, int position) {
+        Toast.makeText(this, "Car Care : " + position, Toast.LENGTH_SHORT).show();
     }
 
     private void setAdapterRV() {
         // Setup Menu Recyclerview
-        recyclerView_Menu = findViewById(R.id.rv_menu);
-        int numberOfColumns = 4;
-        recyclerView_Menu.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
+        recyclerView_Menu = findViewById(R.id.rv_recommended);
+        recyclerView_Menu.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         menuRVAdapter = new MenuRVAdapter(this, mDataItem);
         menuRVAdapter.setClickListener(this);
         recyclerView_Menu.setAdapter(menuRVAdapter);
+
+        recyclerView_carWash = findViewById(R.id.rv_car_wash);
+        recyclerView_carWash.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        carWashRVAdapter = new MenuRVAdapter(this, mDataItem);
+        carWashRVAdapter.setCarWashIitemClickListener(this);
+        recyclerView_carWash.setAdapter(carWashRVAdapter);
+
+        recyclerView_carCare = findViewById(R.id.rv_car_care);
+        recyclerView_carCare.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        carCareRVAdapter = new MenuRVAdapter(this, mDataItem);
+        carCareRVAdapter.setCarCareItemClickListener(this);
+        recyclerView_carCare.setAdapter(carCareRVAdapter);
 
         // Setup Invoice Recyclerview
         recyclerView_Invoice = findViewById(R.id.rv_invoiceItem);
@@ -608,78 +548,27 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             mDataCart.clear();
             blackLayout.setVisibility(View.VISIBLE);
             total_tv.setText("Rp. 0");
-            resultChange = false;
+//            resultChange = false;
         }
 
         @Override
         protected String doInBackground(String... params) {
             // Background process, Fetching data from API
-            String carType = params[0];
-            try {
-                url = new URL("http://app.digiponic.co.id/osac/api/public/service?vehicle=" + carType);
-                Log.d("ConenctionTest", "connected url : " + url.toString());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                Log.d("ConenctionTest", "error url");
-                return "exception";
-            }
-            try {
-                // Setup HttpURLConnection
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(READ_TIMEOUT);
-                conn.setConnectTimeout(CONNECTION_TIMEOUT);
-                conn.setRequestMethod("GET");
-                conn.connect();
-                Log.d("ConenctionTest", "connected");
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                Log.d("ConenctionTest", "not connected");
-                return e1.toString();
-            }
-            try {
-                int response_code = conn.getResponseCode();
 
-                // Check Response Code
-                if (response_code == HttpURLConnection.HTTP_OK) {
-                    //Read data sent from server
-                    Log.d("ResponseCode", String.valueOf(response_code));
-                    InputStream input = conn.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    StringBuilder result = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        result.append(line);
-                    }
-                    String resultFromServer = "";
-                    JSONObject jsonObject = null;
-                    JSONArray jsonArray = null;
-                    try {
-                        jsonArray = new JSONArray(result.toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    int jLoop = 0;
-                    while (jLoop < jsonArray.length()) {
-                        jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
-                        mDataItem.add(new DataItemMenu(jsonObject.getString("id"),
-                                jsonObject.getString("name"), jsonObject.getString("price"),
-                                jsonObject.getString("vehicle"), jsonObject.getString("type"),
-                                jsonObject.getString("images")));
-                        jLoop += 1;
-                    }
-                    return (resultFromServer);
-                } else {
-                    return ("unsuccessful");
+            apiInterface.getJasa().enqueue(new Callback<List<DataItemMenu>>() {
+                @Override
+                public void onResponse(Call<List<DataItemMenu>> call, Response<List<DataItemMenu>> response) {
+                    assert response.body() != null;
+                    mDataItem.addAll(response.body());
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return "exception";
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } finally {
-                conn.disconnect();
-            }
-            return null;
+
+                @Override
+                public void onFailure(Call<List<DataItemMenu>> call, Throwable t) {
+
+                }
+            });
+
+            return  null;
         }
 
         @Override
@@ -687,7 +576,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             super.onPostExecute(s);
             setAdapterRV();
             blackLayout.setVisibility(View.GONE);
-            dataFetched = true;
+            menuRVAdapter.notifyDataSetChanged();
+            Log.d("mDataItemSize", String.valueOf(menuRVAdapter.getItemCount()));
+
+//            dataFetched = true;
         }
     }
 
@@ -780,7 +672,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             super.onPostExecute(s);
             setAdapterRV();
             blackLayout.setVisibility(View.GONE);
-            dataFetched = true;
+//            dataFetched = true;
         }
     }
 
@@ -873,136 +765,136 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             super.onPostExecute(s);
             setAdapterRV();
             blackLayout.setVisibility(View.GONE);
-            dataFetched = true;
+//            dataFetched = true;
         }
     }
 
-    // Post Data
-    public class HTTPAsyncTaskPOSTData extends AsyncTask<String, Void, String> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
+//    // Post Data
+//    public class HTTPAsyncTaskPOSTData extends AsyncTask<String, Void, String> {
+//        @Override
+//        protected void onPreExecute() {
+//            super.onPreExecute();
+//
+//        }
+//
+//        @Override
+//        protected String doInBackground(String... urls) {
+//            // params comes from the execute() call: params[0] is the url.
+//            try {
+//                try {
+//                    return HttpPost(urls[0]);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                    return "Error!";
+//                }
+//            } catch (IOException e) {
+//                return "Unable to retrieve web page. URL may be invalid.";
+//            }
+//        }
+//
+//        // onPostExecute displays the results of the AsyncTask.
+//        @Override
+//        protected void onPostExecute(String result) {
+//            printInvoice();
+//            dataCartClear();
+//            completeDialog.show();
+//
+//        }
+//
+//        private String HttpPost(String myUrl) throws IOException, JSONException {
+//            String result = "";
+//            URL url = new URL(myUrl);
+//
+//            // 1. create HttpURLConnection
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            conn.setRequestMethod("POST");
+//            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+//
+//            // 2. build JSON object
+//            JSONObject jsonObject = createJSON();
+//
+//            // 3. add JSON content to POST request body
+//            setPostRequestContent(conn, jsonObject);
+//
+//            // 4. make POST request to the given URL
+//            conn.connect();
+//
+//            // 5. return response message
+//            return conn.getResponseMessage() + "";
+//        }
+//
+//        private void setPostRequestContent(HttpURLConnection conn,
+//                                           JSONObject jsonObject) throws IOException {
+//            OutputStream os = conn.getOutputStream();
+//            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+//            writer.write(jsonObject.toString());
+//            Log.i(MainActivity.class.toString(), jsonObject.toString());
+//            writer.flush();
+//            writer.close();
+//            os.close();
+//        }
+//    }
 
-        }
-
-        @Override
-        protected String doInBackground(String... urls) {
-            // params comes from the execute() call: params[0] is the url.
-            try {
-                try {
-                    return HttpPost(urls[0]);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    return "Error!";
-                }
-            } catch (IOException e) {
-                return "Unable to retrieve web page. URL may be invalid.";
-            }
-        }
-
-        // onPostExecute displays the results of the AsyncTask.
-        @Override
-        protected void onPostExecute(String result) {
-            printInvoice();
-            dataCartClear();
-            completeDialog.show();
-
-        }
-
-        private String HttpPost(String myUrl) throws IOException, JSONException {
-            String result = "";
-            URL url = new URL(myUrl);
-
-            // 1. create HttpURLConnection
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-
-            // 2. build JSON object
-            JSONObject jsonObject = createJSON();
-
-            // 3. add JSON content to POST request body
-            setPostRequestContent(conn, jsonObject);
-
-            // 4. make POST request to the given URL
-            conn.connect();
-
-            // 5. return response message
-            return conn.getResponseMessage() + "";
-        }
-
-        private void setPostRequestContent(HttpURLConnection conn,
-                                           JSONObject jsonObject) throws IOException {
-            OutputStream os = conn.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-            writer.write(jsonObject.toString());
-            Log.i(MainActivity.class.toString(), jsonObject.toString());
-            writer.flush();
-            writer.close();
-            os.close();
-        }
-    }
-
-    private JSONObject createJSON() throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-
-        // Get IDs
-        int typesID = 0, serviceID = 0;
-
-
-        int total_price = total;
-        int discount = 0;
-        if (mDataCart.size() > 0) {
-            for (DataItemMenu item : mDataCart) {
-                total_price += item.get_itemPrice();
-            }
-        }
-
-        try {
-            // Add Property
-            jsonObject.accumulate("police_number", null);
-            jsonObject.accumulate("generals_id", null);
-            jsonObject.accumulate("total", total_price);
-            jsonObject.accumulate("discount", discount);
-            jsonObject.accumulate("grand_total", total_price);
-
-            //JsonArr
-            JSONArray jsonArray = new JSONArray();
-            for (DataItemMenu item : mDataCart) {
-                // Set IDs
-                Log.d("jumlahVT", String.valueOf(mDataVehicleType.size()));
-                for (DataVehicleType typesItem : mDataVehicleType) {
-                    Log.d("postTypesEq", String.valueOf(item.get_itemVehicleType() + typesItem.getName()));
-                    if (item.get_itemVehicleType().equals(typesItem.getName())) {
-                        typesID = Integer.parseInt(typesItem.getId());
-                        Log.d("postTypesID", String.valueOf(typesID));
-                    }
-                }
-
-                for (DataServiceType serviceType : mDataServiceType) {
-                    Log.d("postService", String.valueOf(item.get_itemType() + serviceType.getName()));
-                    if (item.get_itemType().equals(serviceType.getName())) {
-                        serviceID = Integer.parseInt(serviceType.getId());
-                    }
-                }
-
-                JSONObject pnObj = new JSONObject();
-                pnObj.accumulate("types_id", typesID);
-                pnObj.accumulate("types_name", item.get_itemType());
-                pnObj.accumulate("services_id", serviceID);
-                pnObj.accumulate("services_name", item.get_itemName());
-                pnObj.accumulate("service_price", item.get_itemPrice());
-                jsonArray.put(pnObj);
-            }
-            jsonObject.accumulate("service_detail", jsonArray);
-            Log.d("EXPORTJSON", jsonObject.toString());
-        } catch (JsonIOException e) {
-            Log.d("JSONERROREX", e.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return jsonObject;
-    }
+//    private JSONObject createJSON() throws JSONException {
+//        JSONObject jsonObject = new JSONObject();
+//
+//        // Get IDs
+//        int typesID = 0, serviceID = 0;
+//
+//
+//        int total_price = total;
+//        int discount = 0;
+//        if (mDataCart.size() > 0) {
+//            for (DataItemMenu item : mDataCart) {
+//                total_price += item.get_itemPrice();
+//            }
+//        }
+//
+//        try {
+//            // Add Property
+//            jsonObject.accumulate("police_number", null);
+//            jsonObject.accumulate("generals_id", null);
+//            jsonObject.accumulate("total", total_price);
+//            jsonObject.accumulate("discount", discount);
+//            jsonObject.accumulate("grand_total", total_price);
+//
+//            //JsonArr
+//            JSONArray jsonArray = new JSONArray();
+//            for (DataItemMenu item : mDataCart) {
+//                // Set IDs
+//                Log.d("jumlahVT", String.valueOf(mDataVehicleType.size()));
+//                for (DataVehicleType typesItem : mDataVehicleType) {
+//                    Log.d("postTypesEq", String.valueOf(item.get_itemVehicleType() + typesItem.getName()));
+//                    if (item.get_itemVehicleType().equals(typesItem.getName())) {
+//                        typesID = Integer.parseInt(typesItem.getId());
+//                        Log.d("postTypesID", String.valueOf(typesID));
+//                    }
+//                }
+//
+//                for (DataServiceType serviceType : mDataServiceType) {
+//                    Log.d("postService", String.valueOf(item.get_itemType() + serviceType.getName()));
+//                    if (item.get_itemType().equals(serviceType.getName())) {
+//                        serviceID = Integer.parseInt(serviceType.getId());
+//                    }
+//                }
+//
+//                JSONObject pnObj = new JSONObject();
+//                pnObj.accumulate("types_id", typesID);
+//                pnObj.accumulate("types_name", item.get_itemType());
+//                pnObj.accumulate("services_id", serviceID);
+//                pnObj.accumulate("services_name", item.get_itemName());
+//                pnObj.accumulate("service_price", item.get_itemPrice());
+//                jsonArray.put(pnObj);
+//            }
+//            jsonObject.accumulate("service_detail", jsonArray);
+//            Log.d("EXPORTJSON", jsonObject.toString());
+//        } catch (JsonIOException e) {
+//            Log.d("JSONERROREX", e.toString());
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//        return jsonObject;
+//    }
 
     /*
         Method bellow for supporting purpose
@@ -1010,34 +902,12 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     private void checkEmpty() {
         emptyCart.setVisibility(invoiceRVAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
-    }
-
-    private void checkState() {
-        switch (pageState) {
-            case 0:
-                carType = "Kecil";
-                pageState = 0;
-                changeBtnBackgroound(smallCar);
-
-                break;
-            case 1:
-                carType = "Sedang";
-                pageState = 1;
-                changeBtnBackgroound(mediumCar);
-                break;
-            case 2:
-                carType = "Besar";
-                pageState = 2;
-                changeBtnBackgroound(bigCar);
-                break;
+        if (invoiceRVAdapter.getItemCount() <= 0)  {
+            total = 0;
+            Locale localeID = new Locale("in", "ID");
+            NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
+            total_tv.setText(formatRupiah.format((double) total));
         }
-    }
-
-    private void changeBtnBackgroound(Button button) {
-        smallCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        mediumCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        bigCar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        button.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight));
     }
 
     private void dataCartClear() {
@@ -1088,42 +958,17 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                resultChange = false;
+//                resultChange = false;
                 changeTypeDialog.dismiss();
             }
         });
         okBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                resultChange = true;
+//                resultChange = true;
                 changeTypeDialog.dismiss();
-                changeType(clickedType);
+//                changeType(clickedType);
             }
         });
-    }
-
-    private void changeType(String type) {
-        switch (type) {
-            case "Small":
-                pageState = 0;
-                checkState();
-                new Async_GetData().execute(carType);
-                typeFilter.setSelection(0);
-                break;
-            case "Medium":
-                pageState = 1;
-                checkState();
-                new Async_GetData().execute(carType);
-                typeFilter.setSelection(0);
-                break;
-            case "Big":
-                pageState = 2;
-                checkState();
-                new Async_GetData().execute(carType);
-                typeFilter.setSelection(0);
-                break;
-            default:
-
-        }
     }
 }

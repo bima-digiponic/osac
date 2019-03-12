@@ -37,55 +37,16 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/layout_btnBar"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_constraintLeft_toLeftOf="parent">
-
-        <Button
-            android:id="@+id/btn_smallCar"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary"
-            android:text="Mobil\nKecil"
-            android:textColor="@color/White" />
-
-        <Button
-            android:id="@+id/btn_mediumCar"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary"
-            android:text="Mobil\nSedang"
-            android:textColor="@color/White" />
-
-        <Button
-            android:id="@+id/btn_largeCar"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary"
-            android:text="Mobil\nBesar"
-            android:textColor="@color/White" />
-
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/layout_menu"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintLeft_toRightOf="@id/layout_btnBar"
-        app:layout_constraintRight_toLeftOf="@id/divider_invoice">
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/layout_invoice">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="@color/colorPrimary"
             android:orientation="horizontal">
 
@@ -98,46 +59,122 @@
                 android:textColor="@color/White"
                 android:textSize="36sp" />
 
-            <Spinner
-                android:id="@+id/spinner_filterType"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="15dp"
-                android:layout_weight="1"
-                android:backgroundTint="@color/White"></Spinner>
-
         </LinearLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_menu"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="15dp">
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="Recommended"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rv_recommended"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:paddingBottom="15dp"></android.support.v7.widget.RecyclerView>
 
 
-        </android.support.v7.widget.RecyclerView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="Car Wash"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rv_car_wash"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:paddingBottom="15dp"></android.support.v7.widget.RecyclerView>
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="Car Care"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rv_car_care"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:paddingBottom="15dp"></android.support.v7.widget.RecyclerView>
+
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+        </ScrollView>
 
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/divider_invoice"
+        android:id="@+id/divider"
         android:layout_width="1dp"
         android:layout_height="match_parent"
         android:background="@color/Grey"
         android:orientation="horizontal"
-        app:layout_constraintLeft_toRightOf="@id/layout_menu"
         app:layout_constraintRight_toLeftOf="@id/layout_invoice">
 
-
     </LinearLayout>
+
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/layout_invoice"
         android:layout_width="300dp"
         android:layout_height="match_parent"
         app:layout_constraintRight_toRightOf="parent"
-        tools:layout_editor_absoluteY="243dp"
-        tools:ignore="MissingConstraints">
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteY="243dp">
 
         <TextView
             android:id="@+id/textView_invoice"
@@ -165,34 +202,34 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_weight="2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="2"
                     android:padding="10dp"
                     android:text="Tanggal "
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    app:layout_constraintBottom_toTopOf="@id/btn_checkout"/>
+                    app:layout_constraintBottom_toTopOf="@id/btn_checkout" />
 
                 <TextView
-                    android:layout_weight="1"
                     android:id="@+id/date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
                     android:padding="10dp"
+                    android:textAlignment="textEnd"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textAlignment="textEnd"
-                    app:layout_constraintBottom_toTopOf="@id/btn_checkout"
-                    android:gravity="end" />
+                    app:layout_constraintBottom_toTopOf="@id/btn_checkout" />
 
             </LinearLayout>
 
             <android.support.v7.widget.RecyclerView
-                android:layout_below="@id/date_layout"
                 android:id="@+id/rv_invoiceItem"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_below="@id/date_layout">
 
             </android.support.v7.widget.RecyclerView>
 
@@ -222,30 +259,29 @@
             app:layout_constraintBottom_toTopOf="@id/btn_checkout">
 
             <TextView
-                android:layout_weight="2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="2"
                 android:padding="10dp"
                 android:text="Total "
                 android:textColor="@color/colorPrimary"
                 android:textSize="28sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@id/btn_checkout"/>
+                app:layout_constraintBottom_toTopOf="@id/btn_checkout" />
 
             <TextView
-                android:layout_weight="1"
                 android:id="@+id/total_textview_main"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
                 android:padding="10dp"
+                android:textAlignment="textEnd"
                 android:textSize="28sp"
                 android:textStyle="bold"
-                android:textAlignment="textEnd"
-                app:layout_constraintBottom_toTopOf="@id/btn_checkout"
-                android:gravity="end" />
+                app:layout_constraintBottom_toTopOf="@id/btn_checkout" />
 
         </LinearLayout>
-
 
 
     </android.support.constraint.ConstraintLayout>

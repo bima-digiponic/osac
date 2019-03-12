@@ -32,14 +32,14 @@ public class DatabaseHelperOrder extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void insertData(DataItemMenu dataItemMenu) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String insertQuery = "INSERT OR REPLACE INTO " + Order.TABLE_NAME + " VALUES ( " +
-                dataItemMenu.get_itemID() + ", '" + dataItemMenu.get_itemName() + "', '" +
-                dataItemMenu.get_itemPrice() + "', '" + dataItemMenu.get_itemVehicleType() + "', '" +
-                dataItemMenu.get_itemType() + "', '" + dataItemMenu.get_itemImage() + "')";
-        db.execSQL(insertQuery);
-    }
+//    public void insertData(DataItemMenu dataItemMenu) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        String insertQuery = "INSERT OR REPLACE INTO " + Order.TABLE_NAME + " VALUES ( " +
+//                dataItemMenu.get_itemID() + ", '" + dataItemMenu.get_itemName() + "', '" +
+//                dataItemMenu.get_itemPrice() + "', '" + dataItemMenu.get_itemVehicleType() + "', '" +
+//                dataItemMenu.get_itemType() + "', '" + dataItemMenu.get_itemImage() + "')";
+//        db.execSQL(insertQuery);
+//    }
 
     public void deleteAllData() {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -47,33 +47,33 @@ public class DatabaseHelperOrder extends SQLiteOpenHelper {
         db.execSQL(deleteAllQuery);
     }
 
-    public List<DataItemMenu> getAllData() {
-        List<DataItemMenu> mDataset = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + Order.TABLE_NAME;
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-        if (cursor.moveToFirst()) {
-            do {
-                mDataset.add(new DataItemMenu(cursor.getString(0), cursor.getString(1),
-                        cursor.getString(2), cursor.getString(3), cursor.getString(4),
-                        cursor.getString(5)));
-            } while (cursor.moveToNext());
-        }
-        return mDataset;
-    }
+//    public List<DataItemMenu> getAllData() {
+//        List<DataItemMenu> mDataset = new ArrayList<>();
+//        String selectQuery = "SELECT * FROM " + Order.TABLE_NAME;
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        Cursor cursor = db.rawQuery(selectQuery, null);
+//        if (cursor.moveToFirst()) {
+//            do {
+//                mDataset.add(new DataItemMenu(cursor.getString(0), cursor.getString(1),
+//                        cursor.getString(2), cursor.getString(3), cursor.getString(4),
+//                        cursor.getString(5)));
+//            } while (cursor.moveToNext());
+//        }
+//        return mDataset;
+//    }
 
-    public DataItemMenu getDataByID(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(Order.TABLE_NAME, new String[] {Order.COLUMN_ID, Order.COLUMN_NAME,
-                        Order.COLUMN_PRICE, Order.COLUMN_VEHICLE_TYPE, Order.COLUMN_SERVICE_TYPE, Order.COLUMN_IMAGE}, Order.COLUMN_ID + "=?",
-                new String[]{String.valueOf(id)}, null, null, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
-        return new DataItemMenu(cursor.getString(0), cursor.getString(1),
-                cursor.getString(2), cursor.getString(3), cursor.getString(4),
-                cursor.getString(5));
-    }
+//    public DataItemMenu getDataByID(int id) {
+//        SQLiteDatabase db = this.getReadableDatabase();
+//        Cursor cursor = db.query(Order.TABLE_NAME, new String[] {Order.COLUMN_ID, Order.COLUMN_NAME,
+//                        Order.COLUMN_PRICE, Order.COLUMN_VEHICLE_TYPE, Order.COLUMN_SERVICE_TYPE, Order.COLUMN_IMAGE}, Order.COLUMN_ID + "=?",
+//                new String[]{String.valueOf(id)}, null, null, null, null);
+//        if (cursor != null) {
+//            cursor.moveToFirst();
+//        }
+//        return new DataItemMenu(cursor.getString(0), cursor.getString(1),
+//                cursor.getString(2), cursor.getString(3), cursor.getString(4),
+//                cursor.getString(5));
+//    }
 
     public void deleteDataByID(int id) {
         SQLiteDatabase db = this.getWritableDatabase();

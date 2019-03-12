@@ -38,10 +38,10 @@ public class InvoiceRVAdapter extends RecyclerView.Adapter<InvoiceRVAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         DataItemMenu data = mDataItem.get(i);
-        viewHolder._itemName.setText(data.get_itemName());
+        viewHolder._itemName.setText(data.getName());
         Locale localeID = new Locale("in", "ID");
         NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
-        viewHolder._itemPrice.setText(formatRupiah.format((double)data.get_itemPrice()));
+        viewHolder._itemPrice.setText(formatRupiah.format(Double.parseDouble(data.getPrice())));
     }
 
     @Override
@@ -50,7 +50,7 @@ public class InvoiceRVAdapter extends RecyclerView.Adapter<InvoiceRVAdapter.View
     }
 
     public String getItem(int id) {
-        return String.valueOf(mDataItem.get(id).get_itemName());
+        return String.valueOf(mDataItem.get(id).getName());
     }
 
     public void removeAt(int position) {
