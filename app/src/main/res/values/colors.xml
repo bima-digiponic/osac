@@ -10,4 +10,6 @@
     <color name="transparentBlack_50">#80000000</color>
     <color name="transparent">#00000000</color>
 
+    <color name="demo_dark_transparent">#24000000</color>
+
 </resources>

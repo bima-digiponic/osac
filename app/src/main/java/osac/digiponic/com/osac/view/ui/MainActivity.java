@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.camera2.TotalCaptureResult;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -98,8 +99,13 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     int total = 0;
 
     // Variable Global
-    private String brand;
-    private String carType;
+    private String POLICE_NUMBER = "N1440TRW";
+    private String VEHICLE_TYPE;
+    private String BRAND;
+    private String VEHICLE_NAME;
+    private String DISCOUNT_TYPE = "Nominal";
+    private int DISCOUNT = 0;
+    private int TOTALPRICE = total;
 
     // Constraint
     public static final int CONNECTION_TIMEOUT = 10000;
@@ -112,15 +118,36 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.activity_main);
 
+        Bundle extras = getIntent().getExtras();
+        Log.d("setelahdiangirim", String.valueOf(extras.get("VEHICLE_TYPE")));
+        if (extras == null) {
+            VEHICLE_TYPE = null;
+            BRAND = null;
+            VEHICLE_NAME = null;
+        } else {
+            VEHICLE_TYPE = extras.getString("VEHICLE_TYPE");
+            BRAND = extras.getString("BRAND");
+            VEHICLE_NAME = extras.getString("VEHICLE_NAME");
+        }
+        Toast.makeText(this, VEHICLE_TYPE, Toast.LENGTH_SHORT).show();
+
         // Initialize View Model
         mMainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
-        mMainActivityViewModel.init();
+        mMainActivityViewModel.init(VEHICLE_TYPE);
 
         // Get Data From View Model
-        mMainActivityViewModel.getmMenuData().observe(this, dataItemMenus -> {
-            // Notify Adapter
-            menuRVAdapter.notifyDataSetChanged();
-        });
+//        mMainActivityViewModel.getmMenuData().observe(this, dataItemMenus -> {
+//            // Notify Adapter
+//            menuRVAdapter.notifyDataSetChanged();
+//        });
+
+//        mDataVehicleType = mMainActivityViewModel.getmVehicleData().getValue();
+//        assert mDataVehicleType != null;
+//        for (DataVehicleType item : mDataVehicleType) {
+//            Log.d("itemtipe", item.getId());
+//            Log.d("itemtipe", item.getName());
+//            Log.d("itemtipe", item.getTypes());
+//        }
 
         mMainActivityViewModel.getmServiceData().observe(this, dataServiceTypes -> {
         });
@@ -176,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                     if (mDataCart.size() == 0) {
                         incompleteDialog.show();
                     } else {
-                        new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/api/public/transaction");
+                        new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/api/transaksi");
                         total_tv.setText("Rp. 0");
                     }
 
@@ -187,6 +214,14 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     }
 
     // Method bellow are used to support printing for thermal printer
+
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+
+    }
 
     private void toSetting() {
         Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
@@ -471,33 +506,103 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     @Override
     public void onCarWashItemClick(View view, int position) {
-        Toast.makeText(this, "Car Wash : " + position, Toast.LENGTH_SHORT).show();
+        Log.d("itempositiondebug", String.valueOf(position));
+        Log.d("itempositionname", String.valueOf(carWashRVAdapter.getItemName(position) + carWashRVAdapter.getItemPrice(position)));
+        Locale localeID = new Locale("in", "ID");
+        NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
+        total = 0;
+        if (!carWashRVAdapter.isSelected(position)) {
+            mDataCart.add(new DataItemMenu(carWashRVAdapter.getItemID(position), carWashRVAdapter.getItemName(position),
+                    carWashRVAdapter.getItemPrice(position), carWashRVAdapter.getItemVehicleType(position),
+                    carWashRVAdapter.getItemType(position), carWashRVAdapter.getItemImage(position)));
+            invoiceRVAdapter.notifyDataSetChanged();
+            carWashRVAdapter.setSelected(position, true);
+            carWashRVAdapter.notifyDataSetChanged();
+        } else {
+            for (int i = 0; i < mDataCart.size(); i++) {
+                if (mDataCart.get(i).get_itemName().equalsIgnoreCase(carWashRVAdapter.getItemName(position))) {
+                    invoiceRVAdapter.removeAt(i);
+                    invoiceRVAdapter.notifyItemRemoved(i);
+                    carWashRVAdapter.setSelected(position, false);
+                    carWashRVAdapter.notifyDataSetChanged();
+                    break;
+                }
+            }
+        }
+        Log.d("datacartsizeadd", String.valueOf(mDataCart.size()));
+
+        for (DataItemMenu item : mDataCart) {
+            total += item.get_itemPrice();
+        }
+        if (total > 0) {
+            total_tv.setText(formatRupiah.format((double) total));
+        }
     }
 
     @Override
     public void onCarCareItemClick(View view, int position) {
-        Toast.makeText(this, "Car Care : " + position, Toast.LENGTH_SHORT).show();
+        Log.d("itempositiondebug", String.valueOf(position));
+        Log.d("itempositionname", String.valueOf(carCareRVAdapter.getItemName(position) + carCareRVAdapter.getItemPrice(position)));
+        Locale localeID = new Locale("in", "ID");
+        NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
+        total = 0;
+        if (!carCareRVAdapter.isSelected(position)) {
+            mDataCart.add(new DataItemMenu(carCareRVAdapter.getItemID(position), carCareRVAdapter.getItemName(position),
+                    carCareRVAdapter.getItemPrice(position), carCareRVAdapter.getItemVehicleType(position),
+                    carCareRVAdapter.getItemType(position), carCareRVAdapter.getItemImage(position)));
+            invoiceRVAdapter.notifyDataSetChanged();
+            carCareRVAdapter.setSelected(position, true);
+            carCareRVAdapter.notifyDataSetChanged();
+        } else {
+            for (int i = 0; i < mDataCart.size(); i++) {
+                if (mDataCart.get(i).get_itemName().equalsIgnoreCase(carCareRVAdapter.getItemName(position))) {
+                    invoiceRVAdapter.removeAt(i);
+                    invoiceRVAdapter.notifyItemRemoved(i);
+                    carCareRVAdapter.setSelected(position, false);
+                    carCareRVAdapter.notifyDataSetChanged();
+                    break;
+                }
+            }
+        }
+        Log.d("datacartsizeadd", String.valueOf(mDataCart.size()));
+
+        for (DataItemMenu item : mDataCart) {
+            total += item.get_itemPrice();
+        }
+        if (total > 0) {
+            total_tv.setText(formatRupiah.format((double) total));
+        }
     }
 
     private void setAdapterRV() {
         // Setup Menu Recyclerview
         recyclerView_Menu = findViewById(R.id.rv_recommended);
         recyclerView_Menu.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        menuRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuData().getValue());
+        menuRVAdapter = new MenuRVAdapter(this, new ArrayList<>());
         menuRVAdapter.setClickListener(this);
-        recyclerView_Menu.setAdapter(menuRVAdapter);
 
         recyclerView_carWash = findViewById(R.id.rv_car_wash);
         recyclerView_carWash.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        carWashRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuData().getValue());
+        carWashRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuDataWash().getValue());
         carWashRVAdapter.setCarWashIitemClickListener(this);
-        recyclerView_carWash.setAdapter(carWashRVAdapter);
 
         recyclerView_carCare = findViewById(R.id.rv_car_care);
         recyclerView_carCare.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        carCareRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuData().getValue());
+        carCareRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuDataCare().getValue());
         carCareRVAdapter.setCarCareItemClickListener(this);
-        recyclerView_carCare.setAdapter(carCareRVAdapter);
+
+        // Load Data to UI
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                recyclerView_Menu.setAdapter(menuRVAdapter);
+                menuRVAdapter.notifyDataSetChanged();
+                recyclerView_carWash.setAdapter(carWashRVAdapter);
+                carWashRVAdapter.notifyDataSetChanged();
+                recyclerView_carCare.setAdapter(carCareRVAdapter);
+                carCareRVAdapter.notifyDataSetChanged();
+            }
+        }, 1000);
 
         // Setup Invoice Recyclerview
         recyclerView_Invoice = findViewById(R.id.rv_invoiceItem);
@@ -567,6 +672,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+            Log.d("responseCodePost", String.valueOf(conn.getResponseCode()));
 
             // 2. build JSON object
             JSONObject jsonObject = createJSON();
@@ -598,6 +704,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
         // Get IDs
         int typesID = 0, serviceID = 0;
+        String nama;
 
 
         int total_price = total;
@@ -609,38 +716,48 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
 
         try {
+
+            // Get ID's
+//            for (DataVehicleType item : mDataVehicleType) {
+//                Log.d("itemtipe", item.getId());
+//                Log.d("itemtipe", item.getName());
+//                Log.d("itemtipe", item.getTypes());
+//            }
+
+            // Data Masih Hardcoded
+            String jenisKendaraan = null;
+            switch (VEHICLE_TYPE) {
+                case "25":
+                    jenisKendaraan = "Besar";
+                    break;
+                case "26":
+                    jenisKendaraan = "Kecil";
+                    break;
+                case "27":
+                    jenisKendaraan = "Sedang";
+                    break;
+            }
+
             // Add Property
-            jsonObject.accumulate("police_number", null);
-            jsonObject.accumulate("generals_id", null);
-            jsonObject.accumulate("total", total_price);
-            jsonObject.accumulate("discount", discount);
-            jsonObject.accumulate("grand_total", total_price);
+            jsonObject.accumulate("no_polisi", POLICE_NUMBER);
+            jsonObject.accumulate("jenis_kendaraan", jenisKendaraan);
+            jsonObject.accumulate("merek_kendaraan", BRAND);
+            jsonObject.accumulate("nama_kendaraan", VEHICLE_NAME);
+            jsonObject.accumulate("subtotal", total);
+            jsonObject.accumulate("diskon_tipe", DISCOUNT_TYPE);
+            jsonObject.accumulate("diskon", 0);
+            jsonObject.accumulate("total", total);
 
             //JsonArr
             JSONArray jsonArray = new JSONArray();
             for (DataItemMenu item : mDataCart) {
-                // Set IDs
-                for (DataVehicleType typesItem : mDataVehicleType) {
-                    if (item.get_itemVehicleType().equals(typesItem.getName())) {
-                        typesID = Integer.parseInt(typesItem.getId());
-                    }
-                }
-
-                for (DataServiceType serviceType : mDataServiceType) {
-                    if (item.get_itemType().equals(serviceType.getName())) {
-                        serviceID = Integer.parseInt(serviceType.getId());
-                    }
-                }
-
                 JSONObject pnObj = new JSONObject();
-                pnObj.accumulate("types_id", typesID);
-                pnObj.accumulate("types_name", item.get_itemType());
-                pnObj.accumulate("services_id", serviceID);
-                pnObj.accumulate("services_name", item.get_itemName());
-                pnObj.accumulate("service_price", item.get_itemPrice());
+                pnObj.accumulate("nama", item.get_itemName());
+                pnObj.accumulate("harga", item.get_itemPrice());
+                pnObj.accumulate("kategori", item.get_itemType());
                 jsonArray.put(pnObj);
             }
-            jsonObject.accumulate("service_detail", jsonArray);
+            jsonObject.accumulate("penjualan_detail", jsonArray);
             Log.d("EXPORTJSON", jsonObject.toString());
         } catch (JsonIOException e) {
             Log.d("JSONERROREX", e.toString());

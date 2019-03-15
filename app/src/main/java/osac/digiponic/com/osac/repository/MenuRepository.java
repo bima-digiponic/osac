@@ -28,7 +28,11 @@ public class MenuRepository {
     private static final int READ_TIMEOUT = 15000;
     private static MenuRepository instance;
     private ArrayList<DataItemMenu> dataSet = new ArrayList<>();
+    private ArrayList<DataItemMenu> dataSetWash = new ArrayList<>();
+    private ArrayList<DataItemMenu> dataSetCare = new ArrayList<>();
     private MutableLiveData<List<DataItemMenu>> data = new MutableLiveData<>();
+    private MutableLiveData<List<DataItemMenu>> dataWash = new MutableLiveData<>();
+    private MutableLiveData<List<DataItemMenu>> dataCare = new MutableLiveData<>();
 
     public static MenuRepository getInstance() {
         if (instance == null) {
@@ -37,14 +41,27 @@ public class MenuRepository {
         return instance;
     }
 
-    public MutableLiveData<List<DataItemMenu>> getData() {
-        setMenu();
+    public MutableLiveData<List<DataItemMenu>> getData(String kategori, String jenis_kendaraan) {
+//        dataSet.clear();
+        setMenu(kategori, jenis_kendaraan);
         data.setValue(dataSet);
         return data;
     }
 
-    private void setMenu() {
-        new Async_GetData().execute("");
+    public MutableLiveData<List<DataItemMenu>> getDataWash(String kategori, String jenis_kendaraan) {
+        setMenu(kategori, jenis_kendaraan);
+        dataWash.setValue(dataSetWash);
+        return dataWash;
+    }
+
+    public MutableLiveData<List<DataItemMenu>> getDataCare(String kategori, String jenis_kendaraan) {
+        setMenu(kategori, jenis_kendaraan);
+        dataCare.setValue(dataSetCare);
+        return dataCare;
+    }
+
+    private void setMenu(String kategori, String jenis_kendaraan) {
+        new Async_GetData().execute(kategori, jenis_kendaraan);
     }
 
     // Get Data
@@ -58,10 +75,7 @@ public class MenuRepository {
         protected void onPreExecute() {
             super.onPreExecute();
             // Clear data before execute
-//            mDataItem.clear();
-//            dataCarCare.clear();
-//            dataCarWash.clear();
-//            mDataCart.clear();
+            dataSet.clear();
 //            blackLayout.setVisibility(View.VISIBLE);
 //            total_tv.setText("Rp. 0");
 //            resultChange = false;
@@ -70,9 +84,10 @@ public class MenuRepository {
         @Override
         protected String doInBackground(String... params) {
             // Background process, Fetching data from API
-            String carType = params[0];
+            String KATEGORI = params[0];
+            String JENIS_KENDARAAN = params[1];
             try {
-                url = new URL("http://app.digiponic.co.id/osac/apiosac/api/jasa");
+                url = new URL("http://app.digiponic.co.id/osac/apiosac/api/jasa?kategori=" + KATEGORI + "&jenis_kendaraan=" + JENIS_KENDARAAN);
                 Log.d("ConenctionTest", "connected url : " + url.toString());
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -117,12 +132,26 @@ public class MenuRepository {
                     int jLoop = 0;
                     while (jLoop < jsonArray.length()) {
                         jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
-                        dataSet.add(new DataItemMenu(jsonObject.getString("id"), jsonObject.getString("name"),
-                                jsonObject.getString("price"), jsonObject.getString("jenis_kendaraan_keterangan"),
-                                jsonObject.getString("jenis_kendaraan"), jsonObject.getString("kategori_keterangan"),
-                                jsonObject.getString("kategori"), jsonObject.getString("gambar")));
+                        if (KATEGORI.equals("28")) {
+                            dataSetWash.add(new DataItemMenu(jsonObject.getString("id"), jsonObject.getString("name"),
+                                    jsonObject.getString("price"), jsonObject.getString("jenis_kendaraan_keterangan"),
+                                    jsonObject.getString("jenis_kendaraan"), jsonObject.getString("kategori_keterangan"),
+                                    jsonObject.getString("kategori"), jsonObject.getString("gambar")));
+                            Log.d("DataSetTestDebugWash", "Data Wash : " + dataSetWash.get(jLoop).get_itemName());
+
+                        } else if (KATEGORI.equals("29")){
+                            dataSetCare.add(new DataItemMenu(jsonObject.getString("id"), jsonObject.getString("name"),
+                                    jsonObject.getString("price"), jsonObject.getString("jenis_kendaraan_keterangan"),
+                                    jsonObject.getString("jenis_kendaraan"), jsonObject.getString("kategori_keterangan"),
+                                    jsonObject.getString("kategori"), jsonObject.getString("gambar")));
+                            Log.d("DataSetTestDebugCare", "Data Care : " + dataSetCare.get(jLoop).get_itemName());
+
+                        }
+//                        dataSet.add(new DataItemMenu(jsonObject.getString("id"), jsonObject.getString("name"),
+//                                jsonObject.getString("price"), jsonObject.getString("jenis_kendaraan_keterangan"),
+//                                jsonObject.getString("jenis_kendaraan"), jsonObject.getString("kategori_keterangan"),
+//                                jsonObject.getString("kategori"), jsonObject.getString("gambar")));
                         jLoop += 1;
-                        Log.d("DataSetTestDebug", dataSet.toString());
                     }
                     return (resultFromServer);
                 } else {

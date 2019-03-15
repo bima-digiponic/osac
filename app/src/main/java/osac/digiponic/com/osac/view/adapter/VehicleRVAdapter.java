@@ -55,6 +55,14 @@ public class VehicleRVAdapter extends RecyclerView.Adapter<VehicleRVAdapter.View
         return mDataVehicle.get(position).getId();
     }
 
+    public String getJenisKendaraan(int position) {
+        return mDataVehicle.get(position).getId_jenis_kendaraan();
+    }
+
+    public String getNamaKendaraan(int position) {
+        return mDataVehicle.get(position).getKeterangan();
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView _vehicleName;
 

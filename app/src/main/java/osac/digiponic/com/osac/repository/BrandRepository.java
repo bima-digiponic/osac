@@ -58,21 +58,21 @@ public class BrandRepository {
         MutableLiveData<List<DataVehicle>> dataVehicle = new MutableLiveData<>();
 
         Log.d("isidatavehicleBrandID", brandID);
-        apiInterface.getVehicle(brandID).enqueue(new Callback<List<DataVehicle>>() {
-            @Override
-            public void onResponse(Call<List<DataVehicle>> call, Response<List<DataVehicle>> response) {
-                assert response.body() != null;
-                vehicleList.addAll(response.body());
-                for (DataVehicle vehicle : vehicleList) {
-                    Log.d("isidatavehicle", vehicle.getKeterangan());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<DataVehicle>> call, Throwable t) {
-
-            }
-        });
+//        apiInterface.getVehicle(brandID).enqueue(new Callback<List<DataVehicle>>() {
+//            @Override
+//            public void onResponse(Call<List<DataVehicle>> call, Response<List<DataVehicle>> response) {
+//                assert response.body() != null;
+//                vehicleList.addAll(response.body());
+//                for (DataVehicle vehicle : vehicleList) {
+//                    Log.d("isidatavehicle", vehicle.getKeterangan());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<List<DataVehicle>> call, Throwable t) {
+//
+//            }
+//        });
 
         dataVehicle.setValue(vehicleList);
         return dataVehicle;

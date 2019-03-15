@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +33,7 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
     private RecyclerView recyclerView_Vehicle;
 
     public static String BrandID = null;
+    public static String BrandName = null;
 
     private BrandRVAdapter brandRVAdapter;
     private VehicleRVAdapter vehicleRVAdapter;
@@ -42,6 +45,8 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
 
     private FragmentManager fragmentManager;
     private VehicleListDialog vehicleListDialog;
+
+    private ShimmerRecyclerView shimmerRecyclerView;
 
 
     // Variable
@@ -56,12 +61,9 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         // Lock Screen to Horizontal
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
-        Button debugBtn = findViewById(R.id.add_debug_btn);
-        debugBtn.setOnClickListener(v -> {
-            brandRVAdapter.notifyDataSetChanged();
-            brandRVAdapter.notifyItemInserted(brandActivityViewModel.getBrandData().getValue().size());
+        shimmerRecyclerView = findViewById(R.id.brand_shimmer_recyclerView);
+        shimmerRecyclerView.showShimmerAdapter();
 
-        });
         fragmentManager = getSupportFragmentManager();
         vehicleListDialog = new VehicleListDialog();
 
@@ -70,8 +72,6 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
 
         brandActivityViewModel.getBrandData().observe(this, dataBrands -> {
             brandRVAdapter.notifyDataSetChanged();
-            Log.d("isidebugdata", String.valueOf(brandRVAdapter.getItemCount()));
-            Toast.makeText(BrandSelection.this, "onChanged", Toast.LENGTH_SHORT).show();
         });
 
         setRV();
@@ -88,6 +88,7 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         Log.d("brandvalue", brandActivityViewModel.getBrandData().getValue().toString());
         brandRVAdapter.setClickListener(this);
         new Handler().postDelayed(() -> {
+            shimmerRecyclerView.hideShimmerAdapter();
             recyclerView_Brand.setAdapter(brandRVAdapter);
             brandRVAdapter.notifyDataSetChanged();
         }, 3000);
@@ -99,6 +100,7 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
     public void onItemClick(View view, int position) {
 
         BrandID = String.valueOf(brandRVAdapter.getVehicleId(position));
+        BrandName = String.valueOf(brandRVAdapter.getBrandName(position));
         vehicleListDialog.show(fragmentManager, "Daftar Kendaraan");
     }
 

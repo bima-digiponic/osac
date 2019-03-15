@@ -7,6 +7,18 @@
     tools:context=".view.ui.BrandSelection"
     android:layout_gravity="center">
 
+    <com.cooltechworks.views.shimmer.ShimmerRecyclerView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/brand_shimmer_recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:shimmer_demo_child_count="8"
+        app:shimmer_demo_grid_child_count="4"
+        app:shimmer_demo_layout="@layout/shimmer_brand_item"
+        app:shimmer_demo_layout_manager_type="grid"
+        app:shimmer_demo_angle="20"
+        />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_brands"
         android:padding="20dp"
@@ -14,12 +26,5 @@
         android:layout_height="match_parent">
     </android.support.v7.widget.RecyclerView>
 
-    <Button
-        android:id="@+id/add_debug_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:text="Add"
-        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>

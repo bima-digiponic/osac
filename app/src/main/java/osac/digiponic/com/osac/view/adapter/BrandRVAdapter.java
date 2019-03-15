@@ -56,6 +56,10 @@ public class BrandRVAdapter extends RecyclerView.Adapter<BrandRVAdapter.ViewHold
         return Integer.parseInt(mDataBrand.get(position).getId());
     }
 
+    public String getBrandName(int position) {
+        return mDataBrand.get(position).getKeterangan();
+    }
+
     public interface ItemClickListener {
         void onItemClick(View view, int position);
     }

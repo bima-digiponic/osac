@@ -1,14 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_vehicle_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="10dp">
+    <RelativeLayout
+        android:layout_width="750dp"
+        android:layout_height="500dp">
 
-    </android.support.v7.widget.RecyclerView>
+        <com.cooltechworks.views.shimmer.ShimmerRecyclerView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/vehicle_shimmer_recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:shimmer_demo_child_count="8"
+            app:shimmer_demo_grid_child_count="4"
+            app:shimmer_demo_layout="@layout/shimmer_brand_item"
+            app:shimmer_demo_layout_manager_type="grid"
+            />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_vehicle_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp">
+
+        </android.support.v7.widget.RecyclerView>
+
+
+    </RelativeLayout>
+
 
 </android.support.constraint.ConstraintLayout>
