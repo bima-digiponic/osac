@@ -79,4 +79,10 @@ dependencies {
     // Shimmer
     implementation 'com.github.sharish:ShimmerRecyclerView:v1.3'
 
+    implementation 'pub.devrel:easypermissions:0.4.3'
+    // bluetooth lib sdk
+    implementation files('libs/bluetoothsdk.jar')
+
+    implementation 'com.jakewharton:butterknife:8.8.1'
+
 }

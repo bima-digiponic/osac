@@ -242,10 +242,8 @@ public class DeviceList extends ListActivity {
                         .fetchUuidsWithSdp();
                 UUID uuid = Objects.requireNonNull(btDevices.getItem(position)).getUuids()[0]
                         .getUuid();
-                mbtSocket = Objects.requireNonNull(btDevices.getItem(position))
-                        .createRfcommSocketToServiceRecord(uuid);
+                mbtSocket = Objects.requireNonNull(btDevices.getItem(position)).createRfcommSocketToServiceRecord(uuid);
                 Log.d("testdebugbluetooth11", mbtSocket.toString());
-//                mbtSocket.connect();
                 Log.d("testdebugbluetooth123", "masuk try catch");
                 mbtSocket.connect();
             } catch (IOException ex) {

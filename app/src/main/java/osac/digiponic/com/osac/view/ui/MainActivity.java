@@ -1,8 +1,11 @@
 package osac.digiponic.com.osac.view.ui;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -12,10 +15,12 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.camera2.TotalCaptureResult;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -30,6 +35,8 @@ import android.widget.Toast;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.gson.JsonIOException;
+import com.zj.btsdk.BluetoothService;
+import com.zj.btsdk.PrintPic;
 
 import net.glxn.qrgen.android.QRCode;
 
@@ -52,8 +59,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.OnClick;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import osac.digiponic.com.osac.R;
+import osac.digiponic.com.osac.print.BluetoothHandler;
+import osac.digiponic.com.osac.print.DeviceActivity;
 import osac.digiponic.com.osac.view.adapter.InvoiceRVAdapter;
 import osac.digiponic.com.osac.view.adapter.MenuRVAdapter;
 import osac.digiponic.com.osac.model.DataItemMenu;
@@ -63,8 +73,10 @@ import osac.digiponic.com.osac.print.DeviceList;
 import osac.digiponic.com.osac.print.PrinterCommands;
 import osac.digiponic.com.osac.print.Utils;
 import osac.digiponic.com.osac.viewmodel.MainActivityViewModel;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener {
+public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener, EasyPermissions.PermissionCallbacks, BluetoothHandler.HandlerInterface {
 
     // Dataset
     private List<DataItemMenu> mDataItem = new ArrayList<>();
@@ -115,6 +127,13 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private ShimmerRecyclerView recommended_shimmer;
     private ShimmerRecyclerView carWash_shimmer;
     private ShimmerRecyclerView carCare_shimmer;
+
+    // Bluetooth Printer
+    public static final int RC_BLUETOOTH = 0;
+    public static final int RC_CONNECT_DEVICE = 1;
+    public static final int RC_ENABLE_BLUETOOTH = 2;
+    private BluetoothService mService = null;
+    private boolean isPrinterReady = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,6 +190,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // set Adapter
         setAdapterRV();
 
+        setupBluetooth();
+
+
         // Initialize TextView Total
         total_tv = findViewById(R.id.total_textview_main);
         total_tv.setText("Rp. 0");
@@ -208,26 +230,165 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Set Checkout Button
         checkOutBtn = findViewById(R.id.btn_checkout);
         checkOutBtn.setOnClickListener(v -> {
-            blackLayout.setVisibility(View.VISIBLE);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    blackLayout.setVisibility(View.GONE);
-                    if (mDataCart.size() == 0) {
-                        incompleteDialog.show();
-                    } else {
-                        new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/api/transaksi");
-                        total_tv.setText("Rp. 0");
-                    }
-
-                    Log.d("datacartsize", String.valueOf(mDataCart.size()));
-                }
-            }, 3000);
+//            printImage(R.drawable.downloadwhite);
+//            printTextNew();
+            printInvoice();
+//            blackLayout.setVisibility(View.VISIBLE);
+//            new Handler().postDelayed(() -> {
+//                blackLayout.setVisibility(View.GONE);
+//                if (mDataCart.size() == 0) {
+//                    incompleteDialog.show();
+//                } else {
+//                    new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/api/transaksi");
+//                    total_tv.setText("Rp. 0");
+//                }
+//
+//                Log.d("datacartsize", String.valueOf(mDataCart.size()));
+//            }, 3000);
         });
     }
 
     // Method bellow are used to support printing for thermal printer
 
+    @AfterPermissionGranted(RC_BLUETOOTH)
+    private void setupBluetooth() {
+        String[] params = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN};
+        if (!EasyPermissions.hasPermissions(this, params)) {
+            EasyPermissions.requestPermissions(this, "You need bluetooth permission",
+                    RC_BLUETOOTH, params);
+            return;
+        }
+        mService = new BluetoothService(this, new BluetoothHandler(this));
+    }
+
+    @Override
+    public void onPermissionsGranted(int requestCode, List<String> perms) {
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, List<String> perms) {
+    }
+
+    @Override
+    public void onDeviceConnected() {
+        isPrinterReady = true;
+//        tvStatus.setText("Terhubung dengan perangkat");
+    }
+
+    @Override
+    public void onDeviceConnecting() {
+//        tvStatus.setText("Sedang menghubungkan...");
+    }
+
+    @Override
+    public void onDeviceConnectionLost() {
+        isPrinterReady = false;
+//        tvStatus.setText("Koneksi perangkat terputus");
+    }
+
+    @Override
+    public void onDeviceUnableToConnect() {
+//        tvStatus.setText("Tidak dapat terhubung ke perangkat");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case RC_ENABLE_BLUETOOTH:
+                if (resultCode == RESULT_OK) {
+//                    Log.i(TAG, "onActivityResult: bluetooth aktif");
+                } else
+//                    Log.i(TAG, "onActivityResult: bluetooth harus aktif untuk menggunakan fitur ini");
+                    break;
+            case RC_CONNECT_DEVICE:
+                if (resultCode == RESULT_OK) {
+                    String address = data.getExtras().getString(DeviceActivity.EXTRA_DEVICE_ADDRESS);
+                    BluetoothDevice mDevice = mService.getDevByMac(address);
+                    mService.connect(mDevice);
+                }
+                break;
+        }
+    }
+
+    public void printInvoice() {
+        if (!mService.isAvailable()) {
+            return;
+        }
+        if (isPrinterReady) {
+            Date date = Calendar.getInstance().getTime();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            SimpleDateFormat monthName = new SimpleDateFormat("dd MMMM yyyy");
+            String formattedDate = monthName.format(date);
+
+            // Print
+            printUnicode();
+            printImage(R.drawable.downloadwhite);
+            printTextNew(formattedDate);
+            printQRCode("test");
+            printUnicode();
+            printNewLine();
+            printNewLine();
+
+        } else {
+            if (mService.isBTopen())
+                startActivityForResult(new Intent(this, DeviceActivity.class), RC_CONNECT_DEVICE);
+            else
+                requestBluetooth();
+        }
+    }
+
+    public void printNewLine() {
+        mService.write(PrinterCommands.FEED_LINE);
+    }
+
+    public void printTextNew(String text) {
+        if (!mService.isAvailable()) {
+//            Log.i(TAG, "printText: perangkat tidak support bluetooth");
+            return;
+        }
+        if (isPrinterReady) {
+            if (text == null) {
+                Toast.makeText(this, "Cant print null text", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            mService.write(PrinterCommands.ESC_ALIGN_CENTER);
+            mService.sendMessage(text, "");
+            mService.write(PrinterCommands.ESC_ENTER);
+        } else {
+            if (mService.isBTopen())
+                startActivityForResult(new Intent(this, DeviceActivity.class), RC_CONNECT_DEVICE);
+            else
+                requestBluetooth();
+        }
+    }
+
+    public void printImage(int img) {
+        if (isPrinterReady) {
+            Bitmap bmp = BitmapFactory.decodeResource(getResources(),
+                    img);
+            Bitmap resizedImage = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 0.8), (int) (bmp.getHeight() * 0.8), true);
+            if (resizedImage != null) {
+                byte[] command = Utils.decodeBitmap(resizedImage);
+                mService.write(PrinterCommands.ESC_ALIGN_CENTER);
+                mService.write(command);
+            }
+
+        } else {
+            if (mService.isBTopen())
+                startActivityForResult(new Intent(this, DeviceActivity.class), RC_CONNECT_DEVICE);
+            else
+                requestBluetooth();
+        }
+    }
+
+    private void requestBluetooth() {
+        if (mService != null) {
+            if (!mService.isBTopen()) {
+                Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(intent, RC_ENABLE_BLUETOOTH);
+            }
+        }
+    }
 
     @Override
     public void onBackPressed() {
@@ -237,59 +398,60 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     }
 
     private void toSetting() {
-        Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
-        this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
+//        Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
+//        this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
+        startActivityForResult(new Intent(this, DeviceActivity.class), RC_CONNECT_DEVICE);
     }
 
 
-
-    private void printInvoice() {
-        if (btsocket == null) {
-            Toast.makeText(this, "No Bluetooth Setup Found.", Toast.LENGTH_SHORT).show();
-            Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
-            this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
-        } else {
-            OutputStream opstream = null;
-            try {
-                opstream = btsocket.getOutputStream();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            outputStream = opstream;
-
-            //print command
-            try {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                outputStream = btsocket.getOutputStream();
-
-                byte[] printformat = {0x1B, 0 * 21, FONT_TYPE};
-                //outputStream.write(printformat);
-
-                Date date = Calendar.getInstance().getTime();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-                SimpleDateFormat monthName = new SimpleDateFormat("dd MMMM yyyy");
-                String formattedDate = monthName.format(date);
-
-                // Print
-                printUnicode();
-                printPhoto(R.drawable.downloadwhite);
-                printCustom(formattedDate, 0, 1);
-//                printQRCode(message.getText().toString());
-                printUnicode();
-                printNewLine();
-                printNewLine();
-
-
-                outputStream.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    private void printInvoice() {
+//        if (btsocket == null) {
+//            Toast.makeText(this, "No Bluetooth Setup Found.", Toast.LENGTH_SHORT).show();
+////            Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
+////            this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
+//            startActivityForResult(new Intent(this, DeviceActivity.class), RC_CONNECT_DEVICE);
+//        } else {
+//            OutputStream opstream = null;
+//            try {
+//                opstream = btsocket.getOutputStream();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            outputStream = opstream;
+//
+//            //print command
+//            try {
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                outputStream = btsocket.getOutputStream();
+//
+//                byte[] printformat = {0x1B, 0 * 21, FONT_TYPE};
+//                //outputStream.write(printformat);
+//
+//                Date date = Calendar.getInstance().getTime();
+//                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+//                SimpleDateFormat monthName = new SimpleDateFormat("dd MMMM yyyy");
+//                String formattedDate = monthName.format(date);
+//
+//                // Print
+//                printUnicode();
+//                printPhoto(R.drawable.downloadwhite);
+//                printCustom(formattedDate, 0, 1);
+////                printQRCode(message.getText().toString());
+//                printUnicode();
+//                printNewLine();
+//                printNewLine();
+//
+//
+//                outputStream.flush();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     //print custom
     private void printCustom(String msg, int size, int align) {
@@ -345,7 +507,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             Bitmap bmp = BitmapFactory.decodeResource(getResources(),
                     img);
 //            Bitmap resized = Bitmap.createBitmap(bmp, 0, 0, 200, 200);
-            Bitmap resizeImage = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 0.5), (int) (bmp.getHeight() * 0.5), true);
+            Bitmap resizeImage = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 0.8), (int) (bmp.getHeight() * 0.8), true);
             if (bmp != null) {
                 byte[] command = Utils.decodeBitmap(resizeImage);
                 outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
@@ -358,15 +520,32 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             Log.e("PrintTools", "the file isn't exists");
         }
     }
+
+//    public void printQRCode(String text) {
+//        try {
+//            Bitmap bmp = QRCode.from(text).bitmap();
+//            Bitmap resizeImage = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 2), (int) (bmp.getHeight() * 2), true);
+//            if (bmp != null) {
+//                byte[] command = Utils.decodeBitmap(resizeImage);
+//                outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+//                printText(command);
+//            } else {
+//                Log.e("Print Photo error", "the file isn't exists");
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Log.e("PrintTools", "the file isn't exists");
+//        }
+//    }
 
     public void printQRCode(String text) {
         try {
             Bitmap bmp = QRCode.from(text).bitmap();
-            Bitmap resizeImage = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 2), (int) (bmp.getHeight() * 2), true);
-            if (bmp != null) {
-                byte[] command = Utils.decodeBitmap(resizeImage);
-                outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
-                printText(command);
+            Bitmap resizedImage = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 2), (int) (bmp.getHeight() * 2), true);
+            if (resizedImage != null) {
+                byte[] command = Utils.decodeBitmap(resizedImage);
+                mService.write(PrinterCommands.ESC_ALIGN_CENTER);
+                mService.write(command);
             } else {
                 Log.e("Print Photo error", "the file isn't exists");
             }
@@ -376,28 +555,24 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
     }
 
+//    //print unicode
+//    public void printUnicode() {
+//        try {
+//            outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+//            printText(Utils.UNICODE_TEXT);
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     //print unicode
     public void printUnicode() {
-        try {
-            outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
-            printText(Utils.UNICODE_TEXT);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mService.write(PrinterCommands.ESC_ALIGN_CENTER);
+        printTextNew("#####################");
     }
 
-
-    //print new line
-    private void printNewLine() {
-        try {
-            outputStream.write(PrinterCommands.FEED_LINE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
 
     public static void resetPrint() {
         try {
@@ -467,19 +642,19 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     }
 
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        try {
-            btsocket = DeviceList.getSocket();
-            if (btsocket != null) {
-//                printText(message.getText().toString());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        try {
+//            btsocket = DeviceList.getSocket();
+//            if (btsocket != null) {
+////                printText(message.getText().toString());
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     //==========================================================================================================================
 

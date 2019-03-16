@@ -37,6 +37,9 @@
         <activity
             android:name=".view.ui.MainActivity"
             android:theme="@style/NoActionBar"></activity>
+        <activity
+            android:name=".print.DeviceActivity"
+            android:theme="@style/NoActionBar"></activity>
     </application>
 
 </manifest>
