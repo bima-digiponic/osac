@@ -25,7 +25,7 @@ public class MainActivityViewModel extends ViewModel {
     private MenuRepository menuRepository;
 
     public void init(String jenis_kendaraan) {
-        if (mMenuData != null || mServiceData != null || mVehicleData != null) {
+        if (mMenuData != null || mServiceData != null || mVehicleData != null || mMenuDataWash != null || mMenuDataCare != null) {
             return;
         }
         menuRepository = MenuRepository.getInstance();

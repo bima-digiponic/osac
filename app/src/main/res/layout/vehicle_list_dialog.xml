@@ -15,7 +15,7 @@
             android:layout_height="match_parent"
             app:shimmer_demo_child_count="8"
             app:shimmer_demo_grid_child_count="4"
-            app:shimmer_demo_layout="@layout/shimmer_brand_item"
+            app:shimmer_demo_layout="@layout/shimmer_vehicle_item"
             app:shimmer_demo_layout_manager_type="grid"
             />
 

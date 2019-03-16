@@ -64,7 +64,7 @@ public class VehicleListDialog extends DialogFragment implements VehicleRVAdapte
             shimmerRecyclerView.hideShimmerAdapter();
             recyclerView_Vehicle.setAdapter(vehicleRVAdapter);
             vehicleRVAdapter.notifyDataSetChanged();
-        }, 1000);
+        }, 3000);
 
         this.getDialog().setTitle("Pilih Kendaraaan");
 

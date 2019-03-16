@@ -86,6 +86,17 @@
                         android:textSize="24sp"
                         android:textStyle="bold" />
 
+                    <com.cooltechworks.views.shimmer.ShimmerRecyclerView
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/recommended_shimmer_recyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:shimmer_demo_child_count="8"
+                        app:shimmer_demo_layout="@layout/shimmer_menu_item"
+                        app:shimmer_demo_layout_manager_type="linear_horizontal"
+                        app:shimmer_demo_angle="20"
+                        />
+
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/rv_recommended"
                         android:layout_width="match_parent"
@@ -113,6 +124,17 @@
                         android:textSize="24sp"
                         android:textStyle="bold" />
 
+                    <com.cooltechworks.views.shimmer.ShimmerRecyclerView
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/car_wash_shimmer_recyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:shimmer_demo_child_count="8"
+                        app:shimmer_demo_layout="@layout/shimmer_menu_item"
+                        app:shimmer_demo_layout_manager_type="linear_horizontal"
+                        app:shimmer_demo_angle="20"
+                        />
+
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/rv_car_wash"
                         android:layout_width="match_parent"
@@ -139,6 +161,17 @@
                         android:textColor="@color/colorPrimary"
                         android:textSize="24sp"
                         android:textStyle="bold" />
+
+                    <com.cooltechworks.views.shimmer.ShimmerRecyclerView
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/car_care_shimmer_recyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:shimmer_demo_child_count="8"
+                        app:shimmer_demo_layout="@layout/shimmer_menu_item"
+                        app:shimmer_demo_layout_manager_type="linear_horizontal"
+                        app:shimmer_demo_angle="20"
+                        />
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/rv_car_care"

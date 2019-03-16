@@ -28,6 +28,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.gson.JsonIOException;
 
 import net.glxn.qrgen.android.QRCode;
@@ -111,12 +112,24 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     public static final int CONNECTION_TIMEOUT = 10000;
     public static final int READ_TIMEOUT = 15000;
 
+    private ShimmerRecyclerView recommended_shimmer;
+    private ShimmerRecyclerView carWash_shimmer;
+    private ShimmerRecyclerView carCare_shimmer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Lock Screen to Horizontal
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.activity_main);
+
+        recommended_shimmer = findViewById(R.id.recommended_shimmer_recyclerView);
+        carWash_shimmer = findViewById(R.id.car_wash_shimmer_recyclerView);
+        carCare_shimmer = findViewById(R.id.car_care_shimmer_recyclerView);
+
+        recommended_shimmer.showShimmerAdapter();
+        carWash_shimmer.showShimmerAdapter();
+        carCare_shimmer.showShimmerAdapter();
 
         Bundle extras = getIntent().getExtras();
         Log.d("setelahdiangirim", String.valueOf(extras.get("VEHICLE_TYPE")));
@@ -149,11 +162,11 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 //            Log.d("itemtipe", item.getTypes());
 //        }
 
-        mMainActivityViewModel.getmServiceData().observe(this, dataServiceTypes -> {
-        });
-
-        mMainActivityViewModel.getmVehicleData().observe(this, dataVehicleTypes -> {
-        });
+//        mMainActivityViewModel.getmServiceData().observe(this, dataServiceTypes -> {
+//        });
+//
+//        mMainActivityViewModel.getmVehicleData().observe(this, dataVehicleTypes -> {
+//        });
 
         // set Adapter
         setAdapterRV();
@@ -228,11 +241,13 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
     }
 
+
+
     private void printInvoice() {
         if (btsocket == null) {
             Toast.makeText(this, "No Bluetooth Setup Found.", Toast.LENGTH_SHORT).show();
-//            Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
-//            this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
+            Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
+            this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
         } else {
             OutputStream opstream = null;
             try {
@@ -595,6 +610,11 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                // Remove Shimmer
+                recommended_shimmer.hideShimmerAdapter();
+                carWash_shimmer.hideShimmerAdapter();
+                carCare_shimmer.hideShimmerAdapter();
+
                 recyclerView_Menu.setAdapter(menuRVAdapter);
                 menuRVAdapter.notifyDataSetChanged();
                 recyclerView_carWash.setAdapter(carWashRVAdapter);
@@ -602,7 +622,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                 recyclerView_carCare.setAdapter(carCareRVAdapter);
                 carCareRVAdapter.notifyDataSetChanged();
             }
-        }, 1000);
+        }, 5000);
 
         // Setup Invoice Recyclerview
         recyclerView_Invoice = findViewById(R.id.rv_invoiceItem);

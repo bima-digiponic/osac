@@ -75,9 +75,6 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         });
 
         setRV();
-
-
-
     }
 
     private void setRV() {

@@ -5,6 +5,7 @@ package osac.digiponic.com.osac.print;
  * Created by imrankst1221@gmail.com
  */
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -235,52 +236,40 @@ public class DeviceList extends ListActivity {
                         + btDevices.getItem(position).getAddress(),
                 Toast.LENGTH_SHORT).show();
 
-        Thread connectThread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
+        Thread connectThread = new Thread(() -> {
+            try {
+                boolean gotuuid = Objects.requireNonNull(btDevices.getItem(position))
+                        .fetchUuidsWithSdp();
+                UUID uuid = Objects.requireNonNull(btDevices.getItem(position)).getUuids()[0]
+                        .getUuid();
+                mbtSocket = Objects.requireNonNull(btDevices.getItem(position))
+                        .createRfcommSocketToServiceRecord(uuid);
+                Log.d("testdebugbluetooth11", mbtSocket.toString());
+//                mbtSocket.connect();
+                Log.d("testdebugbluetooth123", "masuk try catch");
+                mbtSocket.connect();
+            } catch (IOException ex) {
+                Log.d("testdebugbluetooth", ex.toString());
+                runOnUiThread(socketErrorRunnable);
                 try {
-                    boolean gotuuid = btDevices.getItem(position)
-                            .fetchUuidsWithSdp();
-                    UUID uuid = btDevices.getItem(position).getUuids()[0]
-                            .getUuid();
-                    mbtSocket = btDevices.getItem(position)
-                            .createRfcommSocketToServiceRecord(uuid);
-
-                    mbtSocket.connect();
-                } catch (IOException ex) {
-                    runOnUiThread(socketErrorRunnable);
-                    try {
-                        mbtSocket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    mbtSocket = null;
-                } finally {
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            finish();
-
-                        }
-                    });
+                    mbtSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+                mbtSocket = null;
+            } finally {
+                runOnUiThread(() -> finish());
             }
         });
 
         connectThread.start();
     }
 
-    private Runnable socketErrorRunnable = new Runnable() {
+    private Runnable socketErrorRunnable = () -> {
+        Toast.makeText(getApplicationContext(),
+                "Cannot establish connection", Toast.LENGTH_SHORT).show();
+        mBluetoothAdapter.startDiscovery();
 
-        @Override
-        public void run() {
-            Toast.makeText(getApplicationContext(),
-                    "Cannot establish connection", Toast.LENGTH_SHORT).show();
-            mBluetoothAdapter.startDiscovery();
-
-        }
     };
 
     @Override

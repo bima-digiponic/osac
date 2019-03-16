@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -19,7 +20,8 @@ public class BrandActivityViewModel extends ViewModel {
     private MutableLiveData<List<DataVehicle>> mVehicleData;
 
     public void init() {
-        if (mBrandData != null) {
+        if (mBrandData != null || brandRepository != null) {
+            Log.d("brandsudahada", "brandsudahada");
             return;
         }
 

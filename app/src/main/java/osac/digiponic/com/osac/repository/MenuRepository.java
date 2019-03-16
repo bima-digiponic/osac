@@ -76,9 +76,8 @@ public class MenuRepository {
             super.onPreExecute();
             // Clear data before execute
             dataSet.clear();
-//            blackLayout.setVisibility(View.VISIBLE);
-//            total_tv.setText("Rp. 0");
-//            resultChange = false;
+            dataSetWash.clear();
+            dataSetCare.clear();
         }
 
         @Override

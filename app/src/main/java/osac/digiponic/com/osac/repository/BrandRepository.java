@@ -85,6 +85,7 @@ public class BrandRepository {
         apiInterface.getBrand().enqueue(new Callback<List<DataBrand>>() {
             @Override
             public void onResponse(Call<List<DataBrand>> call, Response<List<DataBrand>> response) {
+                dataSetBrand.clear();
                 assert response.body() != null;
                 dataSetBrand.addAll(response.body());
                 for (int i = 0; i < response.body().size(); i++) {
