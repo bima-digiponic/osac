@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     int total = 0;
 
     // Variable Global
-    private String POLICE_NUMBER = "N1440TRW";
+    private String POLICE_NUMBER = "N123ABC";
     private String VEHICLE_TYPE;
     private String BRAND;
     private String VEHICLE_NAME;
@@ -134,6 +134,8 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     public static final int RC_ENABLE_BLUETOOTH = 2;
     private BluetoothService mService = null;
     private boolean isPrinterReady = false;
+
+    public static String printerMacAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,6 +162,13 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             VEHICLE_TYPE = extras.getString("VEHICLE_TYPE");
             BRAND = extras.getString("BRAND");
             VEHICLE_NAME = extras.getString("VEHICLE_NAME");
+            printerMacAddress = extras.getString("MAC_ADDRESS");
+        }
+
+        setupBluetooth();
+        if (printerMacAddress != null) {
+            BluetoothDevice mDevice = mService.getDevByMac(printerMacAddress);
+            mService.connect(mDevice);
         }
         Toast.makeText(this, VEHICLE_TYPE, Toast.LENGTH_SHORT).show();
 
@@ -189,8 +198,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
         // set Adapter
         setAdapterRV();
-
-        setupBluetooth();
 
 
         // Initialize TextView Total
@@ -232,19 +239,20 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         checkOutBtn.setOnClickListener(v -> {
 //            printImage(R.drawable.downloadwhite);
 //            printTextNew();
-            printInvoice();
-//            blackLayout.setVisibility(View.VISIBLE);
-//            new Handler().postDelayed(() -> {
-//                blackLayout.setVisibility(View.GONE);
-//                if (mDataCart.size() == 0) {
-//                    incompleteDialog.show();
-//                } else {
-//                    new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/api/transaksi");
-//                    total_tv.setText("Rp. 0");
-//                }
-//
-//                Log.d("datacartsize", String.valueOf(mDataCart.size()));
-//            }, 3000);
+            blackLayout.setVisibility(View.VISIBLE);
+            new Handler().postDelayed(() -> {
+                blackLayout.setVisibility(View.GONE);
+                if (mDataCart.size() == 0) {
+                    incompleteDialog.show();
+                } else {
+                    new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/api/transaksi");
+//                    completeDialog.show();
+//                    printInvoice();
+                    total_tv.setText("Rp. 0");
+                }
+
+                Log.d("datacartsize", String.valueOf(mDataCart.size()));
+            }, 3000);
         });
     }
 
@@ -302,9 +310,13 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                     break;
             case RC_CONNECT_DEVICE:
                 if (resultCode == RESULT_OK) {
-                    String address = data.getExtras().getString(DeviceActivity.EXTRA_DEVICE_ADDRESS);
-                    BluetoothDevice mDevice = mService.getDevByMac(address);
-                    mService.connect(mDevice);
+//                    String address = data.getExtras().getString(DeviceActivity.EXTRA_DEVICE_ADDRESS);
+                    printerMacAddress = data.getExtras().getString(DeviceActivity.EXTRA_DEVICE_ADDRESS);
+                    if (printerMacAddress != null) {
+                        BluetoothDevice mDevice = mService.getDevByMac(printerMacAddress);
+                        mService.connect(mDevice);
+                    }
+
                 }
                 break;
         }
@@ -314,7 +326,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         if (!mService.isAvailable()) {
             return;
         }
-        if (isPrinterReady) {
+        if (printerMacAddress != null) {
+        }
+        if (isPrinterReady || printerMacAddress != null) {
             Date date = Calendar.getInstance().getTime();
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
             SimpleDateFormat monthName = new SimpleDateFormat("dd MMMM yyyy");
@@ -343,7 +357,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     public void printTextNew(String text) {
         if (!mService.isAvailable()) {
-//            Log.i(TAG, "printText: perangkat tidak support bluetooth");
             return;
         }
         if (isPrinterReady) {
@@ -393,8 +406,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-
-
     }
 
     private void toSetting() {
@@ -402,141 +413,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 //        this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
         startActivityForResult(new Intent(this, DeviceActivity.class), RC_CONNECT_DEVICE);
     }
-
-
-//    private void printInvoice() {
-//        if (btsocket == null) {
-//            Toast.makeText(this, "No Bluetooth Setup Found.", Toast.LENGTH_SHORT).show();
-////            Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
-////            this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
-//            startActivityForResult(new Intent(this, DeviceActivity.class), RC_CONNECT_DEVICE);
-//        } else {
-//            OutputStream opstream = null;
-//            try {
-//                opstream = btsocket.getOutputStream();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            outputStream = opstream;
-//
-//            //print command
-//            try {
-//                try {
-//                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                outputStream = btsocket.getOutputStream();
-//
-//                byte[] printformat = {0x1B, 0 * 21, FONT_TYPE};
-//                //outputStream.write(printformat);
-//
-//                Date date = Calendar.getInstance().getTime();
-//                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-//                SimpleDateFormat monthName = new SimpleDateFormat("dd MMMM yyyy");
-//                String formattedDate = monthName.format(date);
-//
-//                // Print
-//                printUnicode();
-//                printPhoto(R.drawable.downloadwhite);
-//                printCustom(formattedDate, 0, 1);
-////                printQRCode(message.getText().toString());
-//                printUnicode();
-//                printNewLine();
-//                printNewLine();
-//
-//
-//                outputStream.flush();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-
-    //print custom
-    private void printCustom(String msg, int size, int align) {
-        //Print config "mode"
-        byte[] cc = new byte[]{0x1B, 0x21, 0x03};  // 0- normal size text
-        //byte[] cc1 = new byte[]{0x1B,0x21,0x00};  // 0- normal size text
-        byte[] bb = new byte[]{0x1B, 0x21, 0x08};  // 1- only bold text
-        byte[] bb2 = new byte[]{0x1B, 0x21, 0x20}; // 2- bold with medium text
-        byte[] bb3 = new byte[]{0x1B, 0x21, 0x10}; // 3- bold with large text
-        try {
-            switch (size) {
-                case 0:
-                    outputStream.write(cc);
-                    break;
-                case 1:
-                    outputStream.write(bb);
-                    break;
-                case 2:
-                    outputStream.write(bb2);
-                    break;
-                case 3:
-                    outputStream.write(bb3);
-                    break;
-            }
-
-            switch (align) {
-                case 0:
-                    //left align
-                    outputStream.write(PrinterCommands.ESC_ALIGN_LEFT);
-                    break;
-                case 1:
-                    //center align
-                    outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
-                    break;
-                case 2:
-                    //right align
-                    outputStream.write(PrinterCommands.ESC_ALIGN_RIGHT);
-                    break;
-            }
-            outputStream.write(msg.getBytes());
-            outputStream.write(PrinterCommands.LF);
-            //outputStream.write(cc);
-            //printNewLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    //print photo
-    public void printPhoto(int img) {
-        try {
-            Bitmap bmp = BitmapFactory.decodeResource(getResources(),
-                    img);
-//            Bitmap resized = Bitmap.createBitmap(bmp, 0, 0, 200, 200);
-            Bitmap resizeImage = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 0.8), (int) (bmp.getHeight() * 0.8), true);
-            if (bmp != null) {
-                byte[] command = Utils.decodeBitmap(resizeImage);
-                outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
-                printText(command);
-            } else {
-                Log.e("Print Photo error", "the file isn't exists");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e("PrintTools", "the file isn't exists");
-        }
-    }
-
-//    public void printQRCode(String text) {
-//        try {
-//            Bitmap bmp = QRCode.from(text).bitmap();
-//            Bitmap resizeImage = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 2), (int) (bmp.getHeight() * 2), true);
-//            if (bmp != null) {
-//                byte[] command = Utils.decodeBitmap(resizeImage);
-//                outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
-//                printText(command);
-//            } else {
-//                Log.e("Print Photo error", "the file isn't exists");
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            Log.e("PrintTools", "the file isn't exists");
-//        }
-//    }
 
     public void printQRCode(String text) {
         try {
@@ -555,46 +431,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
     }
 
-//    //print unicode
-//    public void printUnicode() {
-//        try {
-//            outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
-//            printText(Utils.UNICODE_TEXT);
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     //print unicode
     public void printUnicode() {
         mService.write(PrinterCommands.ESC_ALIGN_CENTER);
         printTextNew("#####################");
-    }
-
-
-    public static void resetPrint() {
-        try {
-            outputStream.write(PrinterCommands.ESC_FONT_COLOR_DEFAULT);
-            outputStream.write(PrinterCommands.FS_FONT_ALIGN);
-            outputStream.write(PrinterCommands.ESC_ALIGN_LEFT);
-            outputStream.write(PrinterCommands.ESC_CANCEL_BOLD);
-            outputStream.write(PrinterCommands.LF);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    //print text
-    private void printText(String msg) {
-        try {
-            // Print normal text
-            outputStream.write(msg.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     //print byte[]
@@ -606,25 +446,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-
-    private String leftRightAlign(String str1, String str2) {
-        String ans = str1 + str2;
-        if (ans.length() < 31) {
-            int n = (31 - str1.length() + str2.length());
-            ans = str1 + new String(new char[n]).replace("\0", " ") + str2;
-        }
-        return ans;
-    }
-
-
-    private String[] getDateTime() {
-        final Calendar c = Calendar.getInstance();
-        String dateTime[] = new String[2];
-        dateTime[0] = c.get(Calendar.DAY_OF_MONTH) + "/" + c.get(Calendar.MONTH) + "/" + c.get(Calendar.YEAR);
-        dateTime[1] = c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE);
-        return dateTime;
     }
 
     @Override
@@ -641,23 +462,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
     }
 
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        try {
-//            btsocket = DeviceList.getSocket();
-//            if (btsocket != null) {
-////                printText(message.getText().toString());
-//            }
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     //==========================================================================================================================
-
 
     @Override
     public void onItemClick(View view, int position) {
@@ -782,21 +587,18 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         carCareRVAdapter.setCarCareItemClickListener(this);
 
         // Load Data to UI
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Remove Shimmer
-                recommended_shimmer.hideShimmerAdapter();
-                carWash_shimmer.hideShimmerAdapter();
-                carCare_shimmer.hideShimmerAdapter();
+        new Handler().postDelayed(() -> {
+            // Remove Shimmer
+            recommended_shimmer.hideShimmerAdapter();
+            carWash_shimmer.hideShimmerAdapter();
+            carCare_shimmer.hideShimmerAdapter();
 
-                recyclerView_Menu.setAdapter(menuRVAdapter);
-                menuRVAdapter.notifyDataSetChanged();
-                recyclerView_carWash.setAdapter(carWashRVAdapter);
-                carWashRVAdapter.notifyDataSetChanged();
-                recyclerView_carCare.setAdapter(carCareRVAdapter);
-                carCareRVAdapter.notifyDataSetChanged();
-            }
+            recyclerView_Menu.setAdapter(menuRVAdapter);
+            menuRVAdapter.notifyDataSetChanged();
+            recyclerView_carWash.setAdapter(carWashRVAdapter);
+            carWashRVAdapter.notifyDataSetChanged();
+            recyclerView_carCare.setAdapter(carCareRVAdapter);
+            carCareRVAdapter.notifyDataSetChanged();
         }, 5000);
 
         // Setup Invoice Recyclerview
@@ -857,6 +659,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             dataCartClear();
             completeDialog.show();
 
+
         }
 
         private String HttpPost(String myUrl) throws IOException, JSONException {
@@ -866,8 +669,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             // 1. create HttpURLConnection
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-            Log.d("responseCodePost", String.valueOf(conn.getResponseCode()));
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
 
             // 2. build JSON object
             JSONObject jsonObject = createJSON();
@@ -877,6 +681,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
             // 4. make POST request to the given URL
             conn.connect();
+
+            Log.d("responseCodePost", String.valueOf(conn.getResponseCode()));
+
 
             // 5. return response message
             return conn.getResponseMessage() + "";
@@ -934,7 +741,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             }
 
             // Add Property
-            jsonObject.accumulate("no_polisi", POLICE_NUMBER);
+            jsonObject.accumulate("nomor_polisi", POLICE_NUMBER);
             jsonObject.accumulate("jenis_kendaraan", jenisKendaraan);
             jsonObject.accumulate("merek_kendaraan", BRAND);
             jsonObject.accumulate("nama_kendaraan", VEHICLE_NAME);
@@ -986,7 +793,13 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         completeDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
         Button okBtn = completeDialog.findViewById(R.id.dialog_ok_btn);
-        okBtn.setOnClickListener(v -> completeDialog.dismiss());
+        okBtn.setOnClickListener(v -> {
+            completeDialog.dismiss();
+            Intent toBrand = new Intent(MainActivity.this, BrandSelection.class);
+            toBrand.putExtra("MAC_ADDRESS", printerMacAddress);
+            startActivity(toBrand);
+            finish();
+        });
     }
 
     private void setupUnCompleteDialog() {

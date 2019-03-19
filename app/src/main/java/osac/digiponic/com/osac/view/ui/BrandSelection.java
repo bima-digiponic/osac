@@ -48,6 +48,8 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
 
     private ShimmerRecyclerView shimmerRecyclerView;
 
+    public static String PRINTER_MAC_ADDRESS;
+
 
     // Variable
     private String VEHICLE_TYPE;
@@ -63,6 +65,13 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
 
         shimmerRecyclerView = findViewById(R.id.brand_shimmer_recyclerView);
         shimmerRecyclerView.showShimmerAdapter();
+
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            PRINTER_MAC_ADDRESS = null;
+        } else {
+            PRINTER_MAC_ADDRESS = extras.getString("MAC_ADDRESS");
+        }
 
         fragmentManager = getSupportFragmentManager();
         vehicleListDialog = new VehicleListDialog();
