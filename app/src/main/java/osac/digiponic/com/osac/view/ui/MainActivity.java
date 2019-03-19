@@ -578,12 +578,12 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
         recyclerView_carWash = findViewById(R.id.rv_car_wash);
         recyclerView_carWash.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        carWashRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuDataWash().getValue());
+        carWashRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuDataCare().getValue());
         carWashRVAdapter.setCarWashIitemClickListener(this);
 
         recyclerView_carCare = findViewById(R.id.rv_car_care);
         recyclerView_carCare.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        carCareRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuDataCare().getValue());
+        carCareRVAdapter = new MenuRVAdapter(this, mMainActivityViewModel.getmMenuDataWash().getValue());
         carCareRVAdapter.setCarCareItemClickListener(this);
 
         // Load Data to UI
@@ -655,10 +655,15 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
+            Intent toPayment = new Intent(MainActivity.this, PaymentActivity.class);
+            toPayment.putExtra("TOTAL", total);
+            Log.d("TOTALPAYMENT : MENU" , String.valueOf(total));
+
             printInvoice();
             dataCartClear();
-            completeDialog.show();
+//            completeDialog.show();
 
+            startActivity(toPayment);
 
         }
 
@@ -775,6 +780,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     private void checkEmpty() {
         emptyCart.setVisibility(invoiceRVAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
+        if (invoiceRVAdapter.getItemCount() <= 0) {
+            total_tv.setText("0");
+        }
     }
 
     private void dataCartClear() {

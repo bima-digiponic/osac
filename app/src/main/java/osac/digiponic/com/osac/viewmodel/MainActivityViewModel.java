@@ -30,8 +30,8 @@ public class MainActivityViewModel extends ViewModel {
         }
         menuRepository = MenuRepository.getInstance();
 //        mMenuData = menuRepository.getData("", jenis_kendaraan);
-        mMenuDataCare = menuRepository.getDataCare("29", jenis_kendaraan);
-        mMenuDataWash = menuRepository.getDataWash("28", jenis_kendaraan);
+        mMenuDataWash = menuRepository.getDataWash("29", jenis_kendaraan);
+        mMenuDataCare = menuRepository.getDataCare("28", jenis_kendaraan);
 
         generalRepository = GeneralRepository.getInstance();
         mVehicleData = generalRepository.getVehicleData();

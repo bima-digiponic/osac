@@ -36,10 +36,14 @@
             android:theme="@style/NoActionBar" />
         <activity
             android:name=".view.ui.MainActivity"
-            android:theme="@style/NoActionBar"></activity>
+            android:theme="@style/NoActionBar" />
         <activity
             android:name=".print.DeviceActivity"
-            android:theme="@style/NoActionBar"></activity>
+            android:theme="@style/NoActionBar" />
+        <activity
+            android:name=".view.ui.PaymentActivity"
+            android:theme="@style/NoActionBar" />
+        <activity android:name=".PaymentSuccessActivity"></activity>
     </application>
 
 </manifest>
