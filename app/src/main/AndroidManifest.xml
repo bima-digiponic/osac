@@ -43,7 +43,8 @@
         <activity
             android:name=".view.ui.PaymentActivity"
             android:theme="@style/NoActionBar" />
-        <activity android:name=".PaymentSuccessActivity"></activity>
+        <activity android:name=".view.ui.PaymentSuccessActivity" />
+        <activity android:name=".view.ui.NumpadDialog"></activity>
     </application>
 
 </manifest>

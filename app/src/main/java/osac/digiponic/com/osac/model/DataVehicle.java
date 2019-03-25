@@ -3,14 +3,24 @@ package osac.digiponic.com.osac.model;
 public class DataVehicle {
 
     private String id, kode_general,
-            kode, id_jenis_kendaraan, keterangan;
+            kode, id_jenis_kendaraan, keterangan,
+            gambar;
 
-    public DataVehicle(String id, String kode_general, String kode, String id_jenis_kendaraan, String keterangan) {
+    public DataVehicle(String id, String kode_general, String kode, String id_jenis_kendaraan, String keterangan, String gambar) {
         this.id = id;
         this.kode_general = kode_general;
         this.kode = kode;
         this.id_jenis_kendaraan = id_jenis_kendaraan;
         this.keterangan = keterangan;
+        this.gambar = gambar;
+    }
+
+    public String getGambar() {
+        return gambar;
+    }
+
+    public void setGambar(String gambar) {
+        this.gambar = gambar;
     }
 
     public String getId() {

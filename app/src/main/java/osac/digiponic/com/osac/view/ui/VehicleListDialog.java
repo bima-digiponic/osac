@@ -64,7 +64,7 @@ public class VehicleListDialog extends DialogFragment implements VehicleRVAdapte
             shimmerRecyclerView.hideShimmerAdapter();
             recyclerView_Vehicle.setAdapter(vehicleRVAdapter);
             vehicleRVAdapter.notifyDataSetChanged();
-        }, 3000);
+        }, 1000);
 
         this.getDialog().setTitle("Pilih Kendaraaan");
 
@@ -79,7 +79,7 @@ public class VehicleListDialog extends DialogFragment implements VehicleRVAdapte
         toMainActivity.putExtra("VEHICLE_TYPE", vehicleRVAdapter.getJenisKendaraan(position));
         toMainActivity.putExtra("BRAND", BrandSelection.BrandName);
         toMainActivity.putExtra("VEHICLE_NAME", vehicleRVAdapter.getNamaKendaraan(position));
-        toMainActivity.putExtra("MAC_ADDRESS", BrandSelection.PRINTER_MAC_ADDRESS);
+//        toMainActivity.putExtra("MAC_ADDRESS", BrandSelection.PRINTER_MAC_ADDRESS);
         Log.d("sebelumdiangirima", vehicleRVAdapter.getJenisKendaraan(position));
         Log.d("sebelumdiangirimbc", BrandSelection.BrandName);
         Log.d("sebelumdiangirimc", vehicleRVAdapter.getNamaKendaraan(position));

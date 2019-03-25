@@ -8,6 +8,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
+        vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     dataBinding {
@@ -86,5 +87,8 @@ dependencies {
     implementation files('libs/bluetoothsdk.jar')
 
     implementation 'com.jakewharton:butterknife:8.8.1'
+
+    // Numpad
+    implementation 'com.fxn769:numpad:1.0'
 
 }

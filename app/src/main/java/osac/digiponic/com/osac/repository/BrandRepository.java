@@ -167,7 +167,7 @@ public class BrandRepository {
                     while (jLoop < jsonArray.length()) {
                         jsonObject = new JSONObject(jsonArray.get(jLoop).toString());
                         vehicleList.add(new DataVehicle(jsonObject.getString("id"), jsonObject.getString("kode_general"),
-                                jsonObject.getString("kode"), jsonObject.getString("jenis_kendaraan"), jsonObject.getString("keterangan")));
+                                jsonObject.getString("kode"), jsonObject.getString("jenis_kendaraan"), jsonObject.getString("keterangan"), jsonObject.getString("gambar")));
                         jLoop += 1;
                     }
                 } else {

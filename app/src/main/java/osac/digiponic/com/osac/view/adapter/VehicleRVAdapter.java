@@ -3,10 +3,14 @@ package osac.digiponic.com.osac.view.adapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -35,6 +39,9 @@ public class VehicleRVAdapter extends RecyclerView.Adapter<VehicleRVAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         DataVehicle data = mDataVehicle.get(i);
+//        viewHolder._vehicleImage._vehicleImage
+        Picasso.get().load(data.getGambar()).into(viewHolder._vehicleImage);
+        Log.d("gambarvehicle", data.getGambar());
         viewHolder._vehicleName.setText(data.getKeterangan());
     }
 
@@ -65,10 +72,12 @@ public class VehicleRVAdapter extends RecyclerView.Adapter<VehicleRVAdapter.View
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView _vehicleName;
+        public ImageView _vehicleImage;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
+            _vehicleImage = itemView.findViewById(R.id.vehicle_image);
             _vehicleName = itemView.findViewById(R.id.vehicle_name_item);
         }
 

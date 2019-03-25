@@ -9,6 +9,7 @@
     <color name="Grey">#707070</color>
     <color name="transparentBlack_50">#80000000</color>
     <color name="transparent">#00000000</color>
+    <color name="LightGrey">#b2bec3</color>
 
     <color name="demo_dark_transparent">#24000000</color>
 

@@ -44,8 +44,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -62,6 +65,8 @@ import java.util.Locale;
 import butterknife.OnClick;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import osac.digiponic.com.osac.R;
+import osac.digiponic.com.osac.helper.DatabaseHelperDevice;
+import osac.digiponic.com.osac.model.DataBluetoothDevice;
 import osac.digiponic.com.osac.print.BluetoothHandler;
 import osac.digiponic.com.osac.print.DeviceActivity;
 import osac.digiponic.com.osac.view.adapter.InvoiceRVAdapter;
@@ -80,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     // Dataset
     private List<DataItemMenu> mDataItem = new ArrayList<>();
-    private List<DataItemMenu> mDataCart = new ArrayList<>();
+    public static List<DataItemMenu> mDataCart = new ArrayList<>();
     private List<DataItemMenu> dataCarWash = new ArrayList<>();
     private List<DataItemMenu> dataCarCare = new ArrayList<>();
     private List<DataVehicleType> mDataVehicleType = new ArrayList<>();
@@ -109,16 +114,16 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     byte FONT_TYPE;
     private static BluetoothSocket btsocket;
     private static OutputStream outputStream;
-    int total = 0;
+    static int total = 0;
 
     // Variable Global
-    private String POLICE_NUMBER = "N123ABC";
-    private String VEHICLE_TYPE;
-    private String BRAND;
-    private String VEHICLE_NAME;
-    private String DISCOUNT_TYPE = "Nominal";
-    private int DISCOUNT = 0;
-    private int TOTALPRICE = total;
+    public static String POLICE_NUMBER = "N123ABC";
+    public static String VEHICLE_TYPE;
+    public static String BRAND;
+    public static String VEHICLE_NAME;
+    public static String DISCOUNT_TYPE = "Nominal";
+    public static int DISCOUNT = 0;
+    public static int TOTALPRICE = total;
 
     // Constraint
     public static final int CONNECTION_TIMEOUT = 10000;
@@ -137,6 +142,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     public static String printerMacAddress;
 
+    private DatabaseHelperDevice db_device;
+    private List<DataBluetoothDevice> device_list = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -152,6 +160,12 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         carWash_shimmer.showShimmerAdapter();
         carCare_shimmer.showShimmerAdapter();
 
+        db_device = new DatabaseHelperDevice(this);
+        device_list.addAll(db_device.getAllData());
+        if (!device_list.isEmpty()) {
+            printerMacAddress = device_list.get(0).getMacAddress();
+        }
+
         Bundle extras = getIntent().getExtras();
         Log.d("setelahdiangirim", String.valueOf(extras.get("VEHICLE_TYPE")));
         if (extras == null) {
@@ -162,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             VEHICLE_TYPE = extras.getString("VEHICLE_TYPE");
             BRAND = extras.getString("BRAND");
             VEHICLE_NAME = extras.getString("VEHICLE_NAME");
-            printerMacAddress = extras.getString("MAC_ADDRESS");
+//            printerMacAddress = extras.getString("MAC_ADDRESS");
         }
 
         setupBluetooth();
@@ -170,7 +184,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             BluetoothDevice mDevice = mService.getDevByMac(printerMacAddress);
             mService.connect(mDevice);
         }
-        Toast.makeText(this, VEHICLE_TYPE, Toast.LENGTH_SHORT).show();
 
         // Initialize View Model
         mMainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
@@ -245,15 +258,32 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                 if (mDataCart.size() == 0) {
                     incompleteDialog.show();
                 } else {
-                    new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/api/transaksi");
+//                    new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/api/transaksi");
 //                    completeDialog.show();
 //                    printInvoice();
-                    total_tv.setText("Rp. 0");
+                    Intent toPayment = new Intent(MainActivity.this, PaymentActivity.class);
+                    toPayment.putExtra("TOTAL", total);
+                    startActivity(toPayment);
+//                    total_tv.setText("Rp. 0");
                 }
 
                 Log.d("datacartsize", String.valueOf(mDataCart.size()));
             }, 3000);
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (invoiceRVAdapter != null) {
+            invoiceRVAdapter.notifyDataSetChanged();
+        }
+        if (carCareRVAdapter != null) {
+            carCareRVAdapter.notifyDataSetChanged();
+        }
+        if (carWashRVAdapter != null) {
+            carWashRVAdapter.notifyDataSetChanged();
+        }
     }
 
     // Method bellow are used to support printing for thermal printer
@@ -311,6 +341,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             case RC_CONNECT_DEVICE:
                 if (resultCode == RESULT_OK) {
 //                    String address = data.getExtras().getString(DeviceActivity.EXTRA_DEVICE_ADDRESS);
+                    db_device.insertData(new DataBluetoothDevice(data.getExtras().getString(DeviceActivity.EXTRA_DEVICE_ADDRESS), "BluetoothPrinter"));
                     printerMacAddress = data.getExtras().getString(DeviceActivity.EXTRA_DEVICE_ADDRESS);
                     if (printerMacAddress != null) {
                         BluetoothDevice mDevice = mService.getDevByMac(printerMacAddress);
@@ -406,6 +437,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        intentToBrand();
     }
 
     private void toSetting() {
@@ -599,7 +631,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             carWashRVAdapter.notifyDataSetChanged();
             recyclerView_carCare.setAdapter(carCareRVAdapter);
             carCareRVAdapter.notifyDataSetChanged();
-        }, 5000);
+        }, 2000);
 
         // Setup Invoice Recyclerview
         recyclerView_Invoice = findViewById(R.id.rv_invoiceItem);
@@ -657,10 +689,10 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         protected void onPostExecute(String result) {
             Intent toPayment = new Intent(MainActivity.this, PaymentActivity.class);
             toPayment.putExtra("TOTAL", total);
-            Log.d("TOTALPAYMENT : MENU" , String.valueOf(total));
+            Log.d("TOTALPAYMENT : MENU", String.valueOf(total));
 
-            printInvoice();
-            dataCartClear();
+//            printInvoice();
+//            dataCartClear();
 //            completeDialog.show();
 
             startActivity(toPayment);
@@ -689,9 +721,46 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
             Log.d("responseCodePost", String.valueOf(conn.getResponseCode()));
 
+            // Getting Response
+            try {
+                int response_code = conn.getResponseCode();
 
-            // 5. return response message
-            return conn.getResponseMessage() + "";
+                if (response_code == HttpURLConnection.HTTP_OK) {
+                    // Read Response
+
+                    InputStream input = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    StringBuilder resultPost = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        resultPost.append(line);
+                    }
+                    String resultFromServer = "";
+                    JSONObject jsonObjectPostResponse = null;
+                    JSONArray jsonArray = null;
+                    try {
+                        jsonArray = new JSONArray(result.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    int jLoop = 0;
+                    while (jLoop < jsonArray.length()) {
+                        jsonObjectPostResponse = new JSONObject(jsonArray.get(jLoop).toString());
+
+                        jLoop += 1;
+                    }
+                }
+                return ("success");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "exception";
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                conn.disconnect();
+            }
+            return null;
+
         }
 
         private void setPostRequestContent(HttpURLConnection conn,
@@ -752,6 +821,8 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             jsonObject.accumulate("nama_kendaraan", VEHICLE_NAME);
             jsonObject.accumulate("subtotal", total);
             jsonObject.accumulate("diskon_tipe", DISCOUNT_TYPE);
+            jsonObject.accumulate("metode_pembayaran", "Tunai");
+            jsonObject.accumulate("nominal_bayar", 1000);
             jsonObject.accumulate("diskon", 0);
             jsonObject.accumulate("total", total);
 
@@ -790,6 +861,14 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         for (DataItemMenu item : mDataItem) {
             item.setSelected(false);
         }
+        for (int i = 0; i < carWashRVAdapter.getItemCount(); i++) {
+            carWashRVAdapter.setSelected(i, false);
+        }
+        for (int i = 0; i < carCareRVAdapter.getItemCount(); i++) {
+            carCareRVAdapter.setSelected(i, false);
+        }
+        carCareRVAdapter.notifyDataSetChanged();
+        carWashRVAdapter.notifyDataSetChanged();
         invoiceRVAdapter.notifyDataSetChanged();
         menuRVAdapter.notifyDataSetChanged();
         total_tv.setText("");
@@ -803,11 +882,15 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         Button okBtn = completeDialog.findViewById(R.id.dialog_ok_btn);
         okBtn.setOnClickListener(v -> {
             completeDialog.dismiss();
-            Intent toBrand = new Intent(MainActivity.this, BrandSelection.class);
-            toBrand.putExtra("MAC_ADDRESS", printerMacAddress);
-            startActivity(toBrand);
-            finish();
+            intentToBrand();
         });
+    }
+
+    private void intentToBrand() {
+        Intent toBrand = new Intent(MainActivity.this, BrandSelection.class);
+        toBrand.putExtra("MAC_ADDRESS", printerMacAddress);
+        startActivity(toBrand);
+        finish();
     }
 
     private void setupUnCompleteDialog() {

@@ -50,9 +50,9 @@
         android:id="@+id/button_payment_method"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="400dp"
+        android:layout_marginLeft="350dp"
         android:layout_marginTop="30dp"
-        android:layout_marginRight="400dp"
+        android:layout_marginRight="350dp"
         android:layout_marginBottom="30dp"
         android:gravity="center"
         android:orientation="horizontal"
@@ -82,11 +82,10 @@
             android:layout_weight="1"
             android:background="@drawable/border"
             android:padding="25dp"
-            android:text="Kartu"
+            android:text="Debit"
             android:textAllCaps="false"
             android:textColor="@color/colorPrimary"
-            android:textSize="26sp"
-            android:visibility="gone"/>
+            android:textSize="26sp"/>
 
     </LinearLayout>
 
@@ -110,6 +109,7 @@
         app:layout_constraintTop_toBottomOf="@id/text_jumlah_pembayaran">
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/amount_1"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
@@ -121,17 +121,19 @@
             android:textSize="24sp" />
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/amount_2"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:background="@color/Grey"
             android:padding="24dp"
-            android:text="Uang Pas"
+            android:text="20.000"
             android:textColor="@color/White"
             android:textSize="24sp" />
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/amount_3"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
@@ -143,6 +145,7 @@
             android:textSize="24sp" />
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/amount_4"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
@@ -154,13 +157,14 @@
             android:textSize="24sp" />
 
         <Button
+            android:textAllCaps="false"
             android:id="@+id/amount_5"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:background="@color/Grey"
             android:padding="24dp"
-            android:text="Uang Pas"
+            android:text="Lainnya"
             android:textColor="@color/White"
             android:textSize="24sp" />
 
@@ -177,13 +181,14 @@
         app:layout_constraintTop_toBottomOf="@id/text_jumlah_pembayaran">
 
         <Button
-            android:id="@+id/amount_uang_pas"
+            android:textAllCaps="false"
+            android:id="@+id/amount_debit"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:background="@color/Grey"
             android:padding="24dp"
-            android:text="Lainnya"
+            android:text="Lanjutkan"
             android:textColor="@color/White"
             android:textSize="24sp" />
     </LinearLayout>

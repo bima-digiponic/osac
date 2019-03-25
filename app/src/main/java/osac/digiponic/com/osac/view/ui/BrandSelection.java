@@ -50,6 +50,7 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
 
     public static String PRINTER_MAC_ADDRESS;
 
+    private boolean doubleBackToExitPressedOnce = false;
 
     // Variable
     private String VEHICLE_TYPE;
@@ -66,12 +67,16 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         shimmerRecyclerView = findViewById(R.id.brand_shimmer_recyclerView);
         shimmerRecyclerView.showShimmerAdapter();
 
-        Bundle extras = getIntent().getExtras();
-        if (extras == null) {
-            PRINTER_MAC_ADDRESS = null;
-        } else {
-            PRINTER_MAC_ADDRESS = extras.getString("MAC_ADDRESS");
+        if (MainActivity.mDataCart != null) {
+            dataCartClear();
         }
+
+//        Bundle extras = getIntent().getExtras();
+//        if (extras == null) {
+//            PRINTER_MAC_ADDRESS = null;
+//        } else {
+//            PRINTER_MAC_ADDRESS = extras.getString("MAC_ADDRESS");
+//        }
 
         fragmentManager = getSupportFragmentManager();
         vehicleListDialog = new VehicleListDialog();
@@ -86,6 +91,31 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         setRV();
     }
 
+    private void dataCartClear() {
+        MainActivity.mDataCart.clear();
+
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Tekan tombol kembali lagi untuk keluar", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
+    }
+
     private void setRV() {
         recyclerView_Brand = findViewById(R.id.rv_brands);
         recyclerView_Brand.setLayoutManager(new GridLayoutManager(this, 4));
@@ -93,13 +123,20 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         brandRVAdapter = new BrandRVAdapter(this, brandActivityViewModel.getBrandData().getValue());
         Log.d("brandvalue", brandActivityViewModel.getBrandData().getValue().toString());
         brandRVAdapter.setClickListener(this);
-        new Handler().postDelayed(() -> {
-            shimmerRecyclerView.hideShimmerAdapter();
-            recyclerView_Brand.setAdapter(brandRVAdapter);
-            brandRVAdapter.notifyDataSetChanged();
-        }, 3000);
+        checkInternetData();
 
         Log.d("datasize", String.valueOf(brandRVAdapter.getItemCount()));
+    }
+
+    private void checkInternetData() {
+        new Handler().postDelayed(() -> {
+            if (brandRVAdapter.getItemCount() > 0) {
+                shimmerRecyclerView.hideShimmerAdapter();
+                recyclerView_Brand.setAdapter(brandRVAdapter);
+            } else {
+                checkInternetData();
+            }
+        }, 1000);
     }
 
     @Override
