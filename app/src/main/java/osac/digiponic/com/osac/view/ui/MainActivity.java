@@ -252,23 +252,24 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         checkOutBtn.setOnClickListener(v -> {
 //            printImage(R.drawable.downloadwhite);
 //            printTextNew();
-            blackLayout.setVisibility(View.VISIBLE);
-            new Handler().postDelayed(() -> {
-                blackLayout.setVisibility(View.GONE);
-                if (mDataCart.size() == 0) {
-                    incompleteDialog.show();
-                } else {
+//            blackLayout.setVisibility(View.VISIBLE);
+            if (mDataCart.size() == 0) {
+                incompleteDialog.show();
+            } else {
 //                    new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/api/transaksi");
 //                    completeDialog.show();
 //                    printInvoice();
-                    Intent toPayment = new Intent(MainActivity.this, PaymentActivity.class);
-                    toPayment.putExtra("TOTAL", total);
-                    startActivity(toPayment);
+                Intent toPayment = new Intent(MainActivity.this, PaymentActivity.class);
+                toPayment.putExtra("TOTAL", total);
+                startActivity(toPayment);
 //                    total_tv.setText("Rp. 0");
-                }
-
-                Log.d("datacartsize", String.valueOf(mDataCart.size()));
-            }, 3000);
+            }
+//            new Handler().postDelayed(() -> {
+////                blackLayout.setVisibility(View.GONE);
+//
+//
+//                Log.d("datacartsize", String.valueOf(mDataCart.size()));
+//            }, 3000);
         });
     }
 
@@ -291,6 +292,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     @AfterPermissionGranted(RC_BLUETOOTH)
     private void setupBluetooth() {
         String[] params = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN};
+
         if (!EasyPermissions.hasPermissions(this, params)) {
             EasyPermissions.requestPermissions(this, "You need bluetooth permission",
                     RC_BLUETOOTH, params);
@@ -619,19 +621,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         carCareRVAdapter.setCarCareItemClickListener(this);
 
         // Load Data to UI
-        new Handler().postDelayed(() -> {
-            // Remove Shimmer
-            recommended_shimmer.hideShimmerAdapter();
-            carWash_shimmer.hideShimmerAdapter();
-            carCare_shimmer.hideShimmerAdapter();
-
-            recyclerView_Menu.setAdapter(menuRVAdapter);
-            menuRVAdapter.notifyDataSetChanged();
-            recyclerView_carWash.setAdapter(carWashRVAdapter);
-            carWashRVAdapter.notifyDataSetChanged();
-            recyclerView_carCare.setAdapter(carCareRVAdapter);
-            carCareRVAdapter.notifyDataSetChanged();
-        }, 2000);
+        loadDataRV();
 
         // Setup Invoice Recyclerview
         recyclerView_Invoice = findViewById(R.id.rv_invoiceItem);
@@ -659,6 +649,27 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                 checkEmpty();
             }
         });
+    }
+
+    private void loadDataRV() {
+        new Handler().postDelayed(() -> {
+            Log.d("datamainmenu", carWashRVAdapter.getItemCount() + " : " + carCareRVAdapter.getItemCount());
+            if (carWashRVAdapter.getItemCount() > 0 && carCareRVAdapter.getItemCount() > 0) {
+                // Remove Shimmer
+                recommended_shimmer.hideShimmerAdapter();
+                carWash_shimmer.hideShimmerAdapter();
+                carCare_shimmer.hideShimmerAdapter();
+
+                recyclerView_Menu.setAdapter(menuRVAdapter);
+                menuRVAdapter.notifyDataSetChanged();
+                recyclerView_carWash.setAdapter(carWashRVAdapter);
+                carWashRVAdapter.notifyDataSetChanged();
+                recyclerView_carCare.setAdapter(carCareRVAdapter);
+                carCareRVAdapter.notifyDataSetChanged();
+            } else {
+                loadDataRV();
+            }
+        }, 1000);
     }
 
     // Post Data

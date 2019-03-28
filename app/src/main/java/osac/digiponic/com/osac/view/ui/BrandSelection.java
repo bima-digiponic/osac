@@ -4,8 +4,10 @@ import android.app.Dialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -97,23 +99,21 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
+//            super.onBackPressed();
+            finish();
+            finishAffinity();
+            System.exit(0);
             return;
         }
 
         this.doubleBackToExitPressedOnce = true;
         Toast.makeText(this, "Tekan tombol kembali lagi untuk keluar", Toast.LENGTH_SHORT).show();
 
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce = false;
-            }
-        }, 2000);
+        new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
     }
 
     private void setRV() {
@@ -130,6 +130,7 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
 
     private void checkInternetData() {
         new Handler().postDelayed(() -> {
+            Log.d("datamainbrand    ", brandRVAdapter.getItemCount() + "");
             if (brandRVAdapter.getItemCount() > 0) {
                 shimmerRecyclerView.hideShimmerAdapter();
                 recyclerView_Brand.setAdapter(brandRVAdapter);

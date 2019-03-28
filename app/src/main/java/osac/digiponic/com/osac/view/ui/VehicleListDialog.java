@@ -56,19 +56,28 @@ public class VehicleListDialog extends DialogFragment implements VehicleRVAdapte
         recyclerView_Vehicle = rootView.findViewById(R.id.rv_vehicle_list);
         recyclerView_Vehicle.setLayoutManager(new GridLayoutManager(this.getActivity(), 4));
 
-        Toast.makeText(getContext(), BrandSelection.BrandID, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getContext(), BrandSelection.BrandID, Toast.LENGTH_SHORT).show();
 
         vehicleRVAdapter = new VehicleRVAdapter(this.getActivity(), vehicleDialogViewModel.getVehicleData().getValue());
         vehicleRVAdapter.setClickListener(this);
-        new Handler().postDelayed(() -> {
-            shimmerRecyclerView.hideShimmerAdapter();
-            recyclerView_Vehicle.setAdapter(vehicleRVAdapter);
-            vehicleRVAdapter.notifyDataSetChanged();
-        }, 1000);
+        setupRV();
 
         this.getDialog().setTitle("Pilih Kendaraaan");
 
         return rootView;
+    }
+
+    private void setupRV() {
+        new Handler().postDelayed(() -> {
+            Log.d("datamaindialog", vehicleRVAdapter.getItemCount() + "");
+            if (vehicleRVAdapter.getItemCount() > 0) {
+                shimmerRecyclerView.hideShimmerAdapter();
+                recyclerView_Vehicle.setAdapter(vehicleRVAdapter);
+                vehicleRVAdapter.notifyDataSetChanged();
+            } else {
+                setupRV();
+            }
+        }, 1000);
     }
 
 

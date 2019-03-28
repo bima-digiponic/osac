@@ -82,7 +82,7 @@ dependencies {
     // Shimmer
     implementation 'com.github.sharish:ShimmerRecyclerView:v1.3'
 
-    implementation 'pub.devrel:easypermissions:0.4.3'
+    implementation 'pub.devrel:easypermissions:2.0.1'
     // bluetooth lib sdk
     implementation files('libs/bluetoothsdk.jar')
 
@@ -90,5 +90,8 @@ dependencies {
 
     // Numpad
     implementation 'com.fxn769:numpad:1.0'
+
+    // SpinKit Loading Progress Bar
+    implementation 'com.github.ybq:Android-SpinKit:1.2.0'
 
 }

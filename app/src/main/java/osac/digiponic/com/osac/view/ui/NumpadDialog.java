@@ -203,6 +203,8 @@ public class NumpadDialog extends DialogFragment {
 
     private void continuePayment() {
         Intent toPaymentContinue = new Intent(this.getContext(), PaymentSuccessActivity.class);
+        toPaymentContinue.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(toPaymentContinue);
+        getActivity().finish();
     }
 }

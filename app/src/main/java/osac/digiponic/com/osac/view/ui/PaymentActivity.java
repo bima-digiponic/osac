@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.JsonIOException;
 
@@ -86,12 +87,35 @@ public class PaymentActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         numpadDialog = new NumpadDialog();
 
+        btnAmount4.setOnClickListener(v -> {
+            if (TOTAL <= 100000) {
+                NumpadDialog.amount = "100000";
+                toContinue();
+            } else {
+                Toast.makeText(this, "Jumlah Pembayaran Tidak Cukup", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         btnAmount3.setOnClickListener(v -> {
-            Intent toPaymentSuccess = new Intent(PaymentActivity.this, PaymentSuccessActivity.class);
-            startActivity(toPaymentSuccess);
+            if (TOTAL <= 50000) {
+                NumpadDialog.amount = "50000";
+                toContinue();
+            } else {
+                Toast.makeText(this, "Jumlah Pembayaran Tidak Cukup", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnAmount2.setOnClickListener(v -> {
+            if (TOTAL <= 20000) {
+                NumpadDialog.amount = "20000";
+                toContinue();
+            } else {
+                Toast.makeText(this, "Jumlah Pembayaran Tidak Cukup", Toast.LENGTH_SHORT).show();
+            }
         });
 
         btnAmount1.setOnClickListener(v -> {
+            NumpadDialog.amount = String.valueOf(TOTAL);
             new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/api/transaksi");
             toContinue();
         });
@@ -114,7 +138,6 @@ public class PaymentActivity extends AppCompatActivity {
         });
         btnKartu.setOnClickListener(v -> {
             if (state != 1) {
-
                 btnKartu.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                 btnKartu.setTextColor(getResources().getColor(R.color.White));
                 btnTunai.setBackground(getResources().getDrawable(R.drawable.border));
@@ -145,7 +168,9 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void toContinue() {
         Intent toPaymentSuccess = new Intent(PaymentActivity.this, PaymentSuccessActivity.class);
+        toPaymentSuccess.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(toPaymentSuccess);
+        finish();
     }
 
     // Post Data
@@ -287,6 +312,13 @@ public class PaymentActivity extends AppCompatActivity {
                     break;
             }
 
+            String metodePembayaran = "";
+            if (state == 0) {
+                metodePembayaran = "Tunai";
+            } else {
+                metodePembayaran = "Debit";
+            }
+
             // Add Property
             jsonObject.accumulate("nomor_polisi", POLICE_NUMBER);
             jsonObject.accumulate("jenis_kendaraan", jenisKendaraan);
@@ -294,8 +326,8 @@ public class PaymentActivity extends AppCompatActivity {
             jsonObject.accumulate("nama_kendaraan", VEHICLE_NAME);
             jsonObject.accumulate("subtotal", total);
             jsonObject.accumulate("diskon_tipe", DISCOUNT_TYPE);
-            jsonObject.accumulate("metode_pembayaran", "Tunai");
-            jsonObject.accumulate("nominal_bayar", 1000);
+            jsonObject.accumulate("metode_pembayaran", metodePembayaran);
+            jsonObject.accumulate("nominal_bayar", NumpadDialog.amount);
             jsonObject.accumulate("diskon", 0);
             jsonObject.accumulate("total", total);
 

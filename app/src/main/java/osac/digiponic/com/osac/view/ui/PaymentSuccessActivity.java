@@ -51,6 +51,8 @@ public class PaymentSuccessActivity extends AppCompatActivity {
         btnDone.setOnClickListener(v -> {
             Intent toBrand = new Intent(PaymentSuccessActivity.this, BrandSelection.class);
             NumpadDialog.amount = "0";
+            toBrand.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            toBrand.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(toBrand);
             finish();
         });
@@ -58,9 +60,15 @@ public class PaymentSuccessActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+//        super.onBackPressed();
+
         if (NumpadDialog.amount != null) {
             NumpadDialog.amount = "";
         }
+        Intent toBrand = new Intent(PaymentSuccessActivity.this, BrandSelection.class);
+        toBrand.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        toBrand.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(toBrand);
+        finish();
     }
 }
