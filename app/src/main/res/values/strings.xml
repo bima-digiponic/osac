@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">OSAC</string>
+    <string name="total_tagihan">Total Tagihan</string>
+    <string name="jumlah_pembayaran">Jumlah Pembayaran</string>
+</resources>
