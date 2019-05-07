@@ -86,10 +86,8 @@ public class BrandRepository {
             @Override
             public void onResponse(Call<List<DataBrand>> call, Response<List<DataBrand>> response) {
                 dataSetBrand.clear();
-                assert response.body() != null;
-                dataSetBrand.addAll(response.body());
-                for (int i = 0; i < response.body().size(); i++) {
-                    Log.d("debugresponbody", response.body().get(i).getKeterangan());
+                if (response.body() != null) {
+                    dataSetBrand.addAll(response.body());
                 }
             }
 
@@ -100,8 +98,6 @@ public class BrandRepository {
         });
 
         dataBrand.setValue(dataSetBrand);
-        Log.d("databranddebug", String.valueOf(dataBrand.getValue().size()));
-        Log.d("datasetbrand", dataSetBrand.toString());
         return dataBrand;
     }
 

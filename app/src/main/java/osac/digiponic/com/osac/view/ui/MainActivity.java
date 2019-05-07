@@ -1,44 +1,33 @@
 package osac.digiponic.com.osac.view.ui;
 
-import android.Manifest;
 import android.app.Dialog;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.hardware.camera2.TotalCaptureResult;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.Handler;
-import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.gson.JsonIOException;
-import com.zj.btsdk.BluetoothService;
-import com.zj.btsdk.PrintPic;
-
-import net.glxn.qrgen.android.QRCode;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,7 +40,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.NumberFormat;
@@ -62,27 +50,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import butterknife.OnClick;
-import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import osac.digiponic.com.osac.R;
 import osac.digiponic.com.osac.helper.DatabaseHelper;
-import osac.digiponic.com.osac.helper.DatabaseHelperDevice;
 import osac.digiponic.com.osac.model.DataBluetoothDevice;
-import osac.digiponic.com.osac.print.BluetoothHandler;
 import osac.digiponic.com.osac.print.DeviceActivity;
 import osac.digiponic.com.osac.view.adapter.InvoiceRVAdapter;
 import osac.digiponic.com.osac.view.adapter.MenuRVAdapter;
 import osac.digiponic.com.osac.model.DataItemMenu;
 import osac.digiponic.com.osac.model.DataServiceType;
 import osac.digiponic.com.osac.model.DataVehicleType;
-import osac.digiponic.com.osac.print.DeviceList;
-import osac.digiponic.com.osac.print.PrinterCommands;
-import osac.digiponic.com.osac.print.Utils;
 import osac.digiponic.com.osac.viewmodel.MainActivityViewModel;
-import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener {
+public class MainActivity extends AppCompatActivity implements MenuRVAdapter.ItemClickListener, NavigationView.OnNavigationItemSelectedListener {
 
     // Dataset
     private List<DataItemMenu> mDataItem = new ArrayList<>();
@@ -98,12 +77,9 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     // Content
     private RecyclerView recyclerView_Menu, recyclerView_carWash, recyclerView_carCare, recyclerView_Invoice;
     private ImageView emptyCart;
-    private Spinner typeFilter;
-    private TextView total_tv, date_tv, hidden_tv;
+    private TextView total_tv, date_tv;
     private Dialog completeDialog, incompleteDialog, changeTypeDialog;
-    private Button smallCar, mediumCar, bigCar, checkOutBtn;
-    private SmoothProgressBar progressBar;
-    private LinearLayout blackLayout;
+    private Button checkOutBtn, pelangganBtn;
 
     // Adapter
     private MenuRVAdapter menuRVAdapter;
@@ -112,9 +88,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     private InvoiceRVAdapter invoiceRVAdapter;
 
     // Variable
-    byte FONT_TYPE;
-    private static BluetoothSocket btsocket;
-    private static OutputStream outputStream;
     public static int total = 0;
 
     // Variable Global
@@ -138,8 +111,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     public static final int RC_BLUETOOTH = 0;
     public static final int RC_CONNECT_DEVICE = 1;
     public static final int RC_ENABLE_BLUETOOTH = 2;
-    private BluetoothService mService = null;
-    private boolean isPrinterReady = false;
 
     public static String printerMacAddress;
 
@@ -152,6 +123,18 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Lock Screen to Horizontal
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
         recommended_shimmer = findViewById(R.id.recommended_shimmer_recyclerView);
         carWash_shimmer = findViewById(R.id.car_wash_shimmer_recyclerView);
@@ -168,7 +151,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
 
         Bundle extras = getIntent().getExtras();
-        Log.d("setelahdiangirim", String.valueOf(extras.get("VEHICLE_TYPE")));
         if (extras == null) {
             VEHICLE_TYPE = null;
             BRAND = null;
@@ -177,34 +159,11 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
             VEHICLE_TYPE = extras.getString("VEHICLE_TYPE");
             BRAND = extras.getString("BRAND");
             VEHICLE_NAME = extras.getString("VEHICLE_NAME");
-//            printerMacAddress = extras.getString("MAC_ADDRESS");
         }
-
-//        setupBluetooth();
 
         // Initialize View Model
         mMainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
         mMainActivityViewModel.init(VEHICLE_TYPE);
-
-        // Get Data From View Model
-//        mMainActivityViewModel.getmMenuData().observe(this, dataItemMenus -> {
-//            // Notify Adapter
-//            menuRVAdapter.notifyDataSetChanged();
-//        });
-
-//        mDataVehicleType = mMainActivityViewModel.getmVehicleData().getValue();
-//        assert mDataVehicleType != null;
-//        for (DataVehicleType item : mDataVehicleType) {
-//            Log.d("itemtipe", item.getId());
-//            Log.d("itemtipe", item.getName());
-//            Log.d("itemtipe", item.getTypes());
-//        }
-
-//        mMainActivityViewModel.getmServiceData().observe(this, dataServiceTypes -> {
-//        });
-//
-//        mMainActivityViewModel.getmVehicleData().observe(this, dataVehicleTypes -> {
-//        });
 
         // set Adapter
         setAdapterRV();
@@ -231,42 +190,51 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         // Initialize Invoice Recyclerview Placeholder
         emptyCart = findViewById(R.id.img_emptyCart);
 
-        // Setup Progress Bar
-        progressBar = findViewById(R.id.progress_bar);
-        blackLayout = findViewById(R.id.loading_layout);
-
         // Setup Hidden Function
-        hidden_tv = findViewById(R.id.textView_invoice);
-        hidden_tv.setOnLongClickListener(v -> {
-            Toast.makeText(MainActivity.this, "Setup Page", Toast.LENGTH_SHORT).show();
-            toSetting();
-            return false;
+        pelangganBtn = findViewById(R.id.button_invoice);
+        pelangganBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent toMember = new Intent(MainActivity.this, MemberActivity.class);
+                startActivity(toMember);
+            }
         });
 
         // Set Checkout Button
         checkOutBtn = findViewById(R.id.btn_checkout);
         checkOutBtn.setOnClickListener(v -> {
-//            printImage(R.drawable.downloadwhite);
-//            printTextNew();
-//            blackLayout.setVisibility(View.VISIBLE);
             if (mDataCart.size() == 0) {
                 incompleteDialog.show();
             } else {
-//                    new HTTPAsyncTaskPOSTData().execute("http://app.digiponic.co.id/osac/apiosac/api/transaksi");
-//                    completeDialog.show();
-//                    printInvoice();
                 Intent toPayment = new Intent(MainActivity.this, PoliceNumberInput.class);
-//                toPayment.putExtra("TOTAL", total);
                 startActivity(toPayment);
-//                    total_tv.setText("Rp. 0");
             }
-//            new Handler().postDelayed(() -> {
-////                blackLayout.setVisibility(View.GONE);
-//
-//
-//                Log.d("datacartsize", String.valueOf(mDataCart.size()));
-//            }, 3000);
         });
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     @Override
@@ -284,15 +252,18 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
     }
 
     private void toSetting() {
-//        Intent BTIntent = new Intent(getApplicationContext(), DeviceList.class);
-//        this.startActivityForResult(BTIntent, DeviceList.REQUEST_CONNECT_BT);
         startActivityForResult(new Intent(this, DeviceActivity.class), RC_CONNECT_DEVICE);
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        intentToBrand();
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            intentToBrand();
+        }
     }
 
     //==========================================================================================================================
@@ -334,8 +305,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     @Override
     public void onCarWashItemClick(View view, int position) {
-        Log.d("itempositiondebug", String.valueOf(position));
-        Log.d("itempositionname", String.valueOf(carWashRVAdapter.getItemName(position) + carWashRVAdapter.getItemPrice(position)));
         Locale localeID = new Locale("in", "ID");
         NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
         total = 0;
@@ -357,8 +326,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                 }
             }
         }
-        Log.d("datacartsizeadd", String.valueOf(mDataCart.size()));
-
         for (DataItemMenu item : mDataCart) {
             total += item.get_itemPrice();
         }
@@ -369,8 +336,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     @Override
     public void onCarCareItemClick(View view, int position) {
-        Log.d("itempositiondebug", String.valueOf(position));
-        Log.d("itempositionname", String.valueOf(carCareRVAdapter.getItemName(position) + carCareRVAdapter.getItemPrice(position)));
         Locale localeID = new Locale("in", "ID");
         NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(localeID);
         total = 0;
@@ -392,8 +357,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
                 }
             }
         }
-        Log.d("datacartsizeadd", String.valueOf(mDataCart.size()));
-
         for (DataItemMenu item : mDataCart) {
             total += item.get_itemPrice();
         }
@@ -452,7 +415,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
 
     private void loadDataRV() {
         new Handler().postDelayed(() -> {
-            Log.d("datamainmenu", carWashRVAdapter.getItemCount() + " : " + carCareRVAdapter.getItemCount());
             if (carWashRVAdapter.getItemCount() > 0 && carCareRVAdapter.getItemCount() > 0) {
                 // Remove Shimmer
                 recommended_shimmer.hideShimmerAdapter();
@@ -499,14 +461,7 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         protected void onPostExecute(String result) {
             Intent toPayment = new Intent(MainActivity.this, PaymentActivity.class);
             toPayment.putExtra("TOTAL", total);
-            Log.d("TOTALPAYMENT : MENU", String.valueOf(total));
-
-//            printInvoice();
-//            dataCartClear();
-//            completeDialog.show();
-
             startActivity(toPayment);
-
         }
 
         private String HttpPost(String myUrl) throws IOException, JSONException {
@@ -602,14 +557,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         }
 
         try {
-
-            // Get ID's
-//            for (DataVehicleType item : mDataVehicleType) {
-//                Log.d("itemtipe", item.getId());
-//                Log.d("itemtipe", item.getName());
-//                Log.d("itemtipe", item.getTypes());
-//            }
-
             // Data Masih Hardcoded
             String jenisKendaraan = null;
             switch (VEHICLE_TYPE) {
@@ -664,24 +611,6 @@ public class MainActivity extends AppCompatActivity implements MenuRVAdapter.Ite
         if (invoiceRVAdapter.getItemCount() <= 0) {
             total_tv.setText("0");
         }
-    }
-
-    private void dataCartClear() {
-        mDataCart.clear();
-        for (DataItemMenu item : mDataItem) {
-            item.setSelected(false);
-        }
-        for (int i = 0; i < carWashRVAdapter.getItemCount(); i++) {
-            carWashRVAdapter.setSelected(i, false);
-        }
-        for (int i = 0; i < carCareRVAdapter.getItemCount(); i++) {
-            carCareRVAdapter.setSelected(i, false);
-        }
-        carCareRVAdapter.notifyDataSetChanged();
-        carWashRVAdapter.notifyDataSetChanged();
-        invoiceRVAdapter.notifyDataSetChanged();
-        menuRVAdapter.notifyDataSetChanged();
-        total_tv.setText("");
     }
 
     private void setupCompleteDialog() {

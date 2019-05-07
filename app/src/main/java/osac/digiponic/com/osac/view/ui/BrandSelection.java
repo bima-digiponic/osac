@@ -2,7 +2,6 @@ package osac.digiponic.com.osac.view.ui;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -10,7 +9,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +17,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -31,8 +28,6 @@ import java.util.List;
 
 import osac.digiponic.com.osac.R;
 import osac.digiponic.com.osac.helper.DatabaseHelper;
-import osac.digiponic.com.osac.helper.DatabaseHelperAbout;
-import osac.digiponic.com.osac.helper.DatabaseHelperDevice;
 import osac.digiponic.com.osac.model.DataBluetoothDevice;
 import osac.digiponic.com.osac.model.DataBrand;
 import osac.digiponic.com.osac.print.BluetoothHandler;
@@ -72,6 +67,7 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
     public static final int RC_ENABLE_BLUETOOTH = 2;
     public static BluetoothService mService = null;
     public static boolean isPrinterReady = false;
+    private BluetoothAdapter bluetoothAdapter;
 
     public static String printerMacAddress = "";
 
@@ -104,12 +100,18 @@ public class BrandSelection extends AppCompatActivity implements BrandRVAdapter.
         });
         db = new DatabaseHelper(this);
 
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         setupBluetooth();
         if (!isPrinterReady) {
-            if (mService.isBTopen())
-                startActivityForResult(new Intent(this, DeviceActivity.class), RC_CONNECT_DEVICE);
-            else
-                requestBluetooth();
+            if (bluetoothAdapter != null) {
+                if (mService.isBTopen())
+                    startActivityForResult(new Intent(this, DeviceActivity.class), RC_CONNECT_DEVICE);
+                else
+                    requestBluetooth();
+            } else {
+                Toast.makeText(this, "No Bluetooth Supported", Toast.LENGTH_SHORT).show();
+            }
+
         }
         if (!printerMacAddress.equals("") && mService != null) {
             BluetoothDevice mDevice = mService.getDevByMac(printerMacAddress);

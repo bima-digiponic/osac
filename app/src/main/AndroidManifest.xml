@@ -16,10 +16,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".view.ui.LoginActivity"></activity>
         <activity
-            android:name=".MemberRegistration"
-            android:theme="@style/NoActionBar"/>
+            android:name=".view.ui.MemberActivity"
+            android:label="@string/title_activity_member"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".view.ui.LoginActivity" />
+        <activity
+            android:name=".view.ui.MemberRegistration"
+            android:theme="@style/NoActionBar" />
         <activity android:name=".view.ui.PoliceNumberInput" />
         <activity android:name=".view.ui.ConfigActivity" />
         <activity

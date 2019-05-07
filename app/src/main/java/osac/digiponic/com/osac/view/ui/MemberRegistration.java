@@ -1,41 +1,36 @@
-package osac.digiponic.com.osac;
+package osac.digiponic.com.osac.view.ui;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import osac.digiponic.com.osac.view.ui.PoliceNumberInput;
+import osac.digiponic.com.osac.R;
 
-public class MemberRegistration extends AppCompatActivity {
+public class MemberRegistration extends DialogFragment {
 
-    private EditText nama, email, alamat, no_telp, no_polisi;
-    private Button registBtn;
-    public static boolean fromMember = false;
+   private EditText namaEdit, emailEdit, noTelpEdit;
+   private Button daftarBtn;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_member_registration);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.activity_member_registration, container);
 
-        bindView();
+        namaEdit = rootView.findViewById(R.id.name_member_regist);
+        emailEdit = rootView.findViewById(R.id.email_member_regist);
+        noTelpEdit = rootView.findViewById(R.id.phone_member_regist);
+        daftarBtn = rootView.findViewById(R.id.btn_member_regist);
 
-        registBtn.setOnClickListener(v -> {
-            Intent toInputNoPol = new Intent(MemberRegistration.this, PoliceNumberInput.class);
-            fromMember = true;
-            startActivity(toInputNoPol);
-        });
-    }
 
-    private void bindView() {
-        nama = findViewById(R.id.input_member_nama);
-        email = findViewById(R.id.input_member_email);
-        alamat = findViewById(R.id.input_member_alamat);
-        no_polisi = findViewById(R.id.input_member_no_polisi);
-        no_telp = findViewById(R.id.input_member_no_telp);
 
-        registBtn = findViewById(R.id.button_regist_member);
+        return rootView;
     }
 }

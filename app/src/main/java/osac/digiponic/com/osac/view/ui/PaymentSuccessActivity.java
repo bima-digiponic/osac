@@ -29,7 +29,6 @@ import java.util.Locale;
 
 import osac.digiponic.com.osac.R;
 import osac.digiponic.com.osac.helper.DatabaseHelper;
-import osac.digiponic.com.osac.helper.DatabaseHelperDevice;
 import osac.digiponic.com.osac.model.DataAbout;
 import osac.digiponic.com.osac.model.DataBluetoothDevice;
 import osac.digiponic.com.osac.model.DataItemMenu;

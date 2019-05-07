@@ -4,14 +4,12 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.List;
 
 import osac.digiponic.com.osac.model.DataBrand;
 import osac.digiponic.com.osac.model.DataVehicle;
 import osac.digiponic.com.osac.repository.BrandRepository;
-import osac.digiponic.com.osac.view.ui.BrandSelection;
 
 public class BrandActivityViewModel extends ViewModel {
 

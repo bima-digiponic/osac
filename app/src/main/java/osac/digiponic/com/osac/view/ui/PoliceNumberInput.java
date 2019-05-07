@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import osac.digiponic.com.osac.MemberRegistration;
 import osac.digiponic.com.osac.R;
 
 public class PoliceNumberInput extends AppCompatActivity {
@@ -78,13 +77,7 @@ public class PoliceNumberInput extends AppCompatActivity {
     }
 
     private void memberCheck() {
-        if (isMember) {
 
-        } else if (MemberRegistration.fromMember) {
-
-        } else {
-            memberDialog.show();
-        }
     }
 
     private void toPayment() {

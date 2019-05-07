@@ -20,7 +20,7 @@ public class SplashScreen extends AppCompatActivity {
 
         new Handler().postDelayed(() -> {
 
-            startActivity(new Intent(SplashScreen.this,BrandSelection.class));
+            startActivity(new Intent(SplashScreen.this, LoginActivity.class));
             finish();
         },2000);
     }
